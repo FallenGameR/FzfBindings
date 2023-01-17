@@ -206,7 +206,7 @@ function Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
     $fzfArgs += "--padding", "1%"           # To set some borders
     $fzfArgs += "--border"                  # To set some borders
     $fzfArgs += "--keep-right"              # Preview to the right
-    $fzfArgs += "--preview", "pwsh.exe -nop -f $PSScriptRoot/Preview/Show-GitBranch {}"
+    $fzfArgs += "--preview", "pwsh.exe -nop -f $PSScriptRoot/Preview/Show-GitBranch.ps1 {}"
     $fzfArgs += "--preview-window=60%"      # Preview size
 
     # fzf filter
@@ -222,14 +222,6 @@ function Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
         where{ $psitem -match "^(\S+)"} |
         foreach{ $matches[1]} |
         foreach{ $value = $psitem; $objects | where{ $psitem.$key -eq $value } }
-}
-
-function SCRIPT:Assert-FzfInstalled
-{
-    if( -not (gcm fzf) )
-    {
-        throw "fzf is needed, please install it first"
-    }
 }
 
 function SCRIPT:Assert-GitEmptyStatus
@@ -320,5 +312,3 @@ function SCRIPT:Update-GitReset( $name )
 
     "> Git reset --hard $name - done"
 }
-
-Assert-FzfInstalled
