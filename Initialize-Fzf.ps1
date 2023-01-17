@@ -202,7 +202,7 @@ function Set-LocationFzf
     )
 
     $fzfArgs = Get-PreviewArgsFzf $path
-    $cdf = "$PSScriptRoot/../FZF/Invoke-Cdf.ps1"
+    $cdf = "$PSScriptRoot/Walk/Get-Folder.ps1"
 
     $destination = @(& $cdf | fzf @fzfArgs)
     $destination
@@ -363,7 +363,7 @@ function Invoke-CodeFzf
     if( -not $paths )
     {
         $fzfArgs = Get-PreviewArgsFzf
-        $codef = "$PSScriptRoot/../FZF/Invoke-Codef.ps1"
+        $codef = "$PSScriptRoot/Walk/Get-FileEntry.ps1"
         $paths = @(& $codef | fzf @fzfArgs)
     }
 
