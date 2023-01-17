@@ -202,13 +202,11 @@ function Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
     $fzfArgs += "--multi"                   # Allow multi selection
 
     # Pre view
-    $root = $PSScriptRoot
-    if( -not $root ) { $root = "." }        # For debug
     $fzfArgs += "--margin", "1%"            # To set some borders
     $fzfArgs += "--padding", "1%"           # To set some borders
     $fzfArgs += "--border"                  # To set some borders
     $fzfArgs += "--keep-right"              # Preview to the right
-    $fzfArgs += "--preview", "pwsh.exe -nop -f $root/Import-GitBranchPreview.ps1 {}"
+    $fzfArgs += "--preview", "pwsh.exe -nop -f $PSScriptRoot/Preview/Show-GitBranch {}"
     $fzfArgs += "--preview-window=60%"      # Preview size
 
     # fzf filter
