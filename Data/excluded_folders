@@ -1,0 +1,9 @@
+.git
+.pkgrefgen
+bin
+cache
+obj
+objd
+out
+target
+TestResults

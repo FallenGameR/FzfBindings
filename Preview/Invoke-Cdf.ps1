@@ -4,20 +4,10 @@
 # - make sure that we use command that is OneDrive friendly (Linux find downloads everything while enumerating)
 # - allow fzf to terminate output early (piped in input blocks fzf from exit)
 
-# Spell-checker: disable
 function excluded_folders
 {
-    ".git"
-    ".pkgrefgen"
-    "bin"
-    "cache"
-    "obj"
-    "objd"
-    "out"
-    "target"
-    "TestResults"
+    Get-Content "$PsScriptRoot/../Data/excluded_folders"
 }
-# Spell-checker: enable
 
 function included_folders
 {
