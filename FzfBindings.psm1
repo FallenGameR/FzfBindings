@@ -23,4 +23,12 @@ if( [version]::Parse($fzfVersion) -lt $fzfMinVersion )
 }
 
 # Setting up aliases
-# Set-Alias ...
+Set-Alias hlp Show-Help
+Set-Alias pf Show-PreviewFzf
+Set-Alias startf Start-ProcessFzf
+Set-Alias cdf Set-LocationFzf
+Set-Alias killf Stop-ProcessFzf
+Set-Alias pushf Push-LocationFzf
+Set-Alias hf Invoke-HistoryFzf
+Set-Alias codef Invoke-CodeFzf
+Set-Alias rgf Search-RipgrepFzf

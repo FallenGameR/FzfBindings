@@ -191,13 +191,8 @@ function Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
 {
     $fzfArgs = @()
 
-    # Main view
+    # Main view, in adding to default args
     $fzfArgs += "--header-lines=$header"    # Table header
-    $fzfArgs += "--layout=reverse"          # Grow list down, not upwards
-    $fzfArgs += "--tabstop=4"               # Standard tab size
-    $fzfArgs += "--cycle"                   # Cycle the list
-    $fzfArgs += "--ansi"                    # Use Powershell colors
-    $fzfArgs += "--no-mouse"                # We need terminal mouse behavior, not custom one
     $fzfArgs += "--info=hidden"             # Finder info style
     $fzfArgs += "--multi"                   # Allow multi selection
 
@@ -206,7 +201,7 @@ function Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
     $fzfArgs += "--padding", "1%"           # To set some borders
     $fzfArgs += "--border"                  # To set some borders
     $fzfArgs += "--keep-right"              # Preview to the right
-    $fzfArgs += "--preview", "pwsh.exe -nop -f $PSScriptRoot/Preview/Show-GitBranch.ps1 {}"
+    $fzfArgs += "--preview", "$pwsh -nop -f $PSScriptRoot/Preview/Show-GitBranch.ps1 {}"
     $fzfArgs += "--preview-window=60%"      # Preview size
 
     # fzf filter

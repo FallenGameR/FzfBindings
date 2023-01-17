@@ -31,10 +31,34 @@
 
     # Aliases to export from this module
     AliasesToExport = @(
+        Set-Alias hlp Show-Help
+        Set-Alias pf Show-PreviewFzf
+        Set-Alias startf Start-ProcessFzf
+        Set-Alias cdf Set-LocationFzf
+        Set-Alias killf Stop-ProcessFzf
+        Set-Alias pushf Push-LocationFzf
+        Set-Alias hf Invoke-HistoryFzf
+        Set-Alias codef Invoke-CodeFzf
+        Set-Alias rgf Search-RipgrepFzf
     )
 
     # Functions to export from this module
     FunctionsToExport = @(
+        Show-Help
+        Show-PreviewFzf
+        Start-ProcessFzf
+        Set-LocationFzf
+        Stop-ProcessFzf
+        Push-LocationFzf
+        Invoke-HistoryFzf
+        Invoke-CodeFzf
+        Search-RipgrepFzf
+        Get-GitBranch
+        Get-GitPrBranch
+        Select-GitBranch
+        Send-GitBranch # start URL
+        Clear-GitBranch
+        Select-GitBranchFzf
     )
 
     # Modules that must be imported into the global environment prior to importing this module
