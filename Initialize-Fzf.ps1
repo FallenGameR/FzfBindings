@@ -105,7 +105,7 @@ function Get-PreviewArgsFzf( $path )
         "--padding", "1%",
         "--border",
         "--keep-right",
-        "--preview", "$pwsh -nop -f $PSScriptRoot/../FZF/Preview-CodeF.ps1 {}",
+        "--preview", "$pwsh -nop -f $PSScriptRoot/Preview/Show-FileEntry.ps1 {}",
         "--preview-window=55%"
 
     $executedFromCode = (gps -id $pid | % parent | % name) -eq "Code"
