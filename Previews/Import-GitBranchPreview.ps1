@@ -1,8 +1,12 @@
 if( $args[0] -match "^(\S+)" ) { $branch = $matches[1] }
 if( -not $branch ) { return }
 
+# https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+# https://duffney.io/usingansiescapesequencespowershell/
+function SCRIPT:e { "`e[" + ($args -join ";") + "m" }
+
 # Init
-"Branch " + "`e[36m" + $branch + "`e[0m"
+"Branch $(e 36m)$branch$(e 0)"
 
 $prBranch = git branch --remotes --list branch "origin/dev/$env:USERNAME/$branch" | % trim
 if( $prBranch )
@@ -16,7 +20,7 @@ $diffStart = if( $prBranch ) { $prBranch } else { git merge-base $branch "origin
 if( $branch -eq "master" )
 {
     ""
-    "`e[36m" + "# Log" + "`e[0m"
+    "$(e 36)# Log$(e 0)"
     ""
 
     $param = @(
@@ -35,7 +39,7 @@ if( $branch -eq "master" )
 
 # Log output
 ""
-"`e[36m" + "# Iteration log" + "`e[0m"
+"$(e 36)# Iteration log$(e 0)"
 ""
 $param = @(
     "log",
@@ -51,7 +55,7 @@ git @param
 # Diff, for some reason delta is not picked up by default
 ""
 ""
-"`e[36m" + "# Interation diff" + "`e[0m"
+"$(e 36)# Interation diff$(e 0)"
 if( gcm delta )
 {
     git --no-pager diff $diffStart $branch "--color=always" | delta
