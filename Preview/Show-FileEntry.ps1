@@ -28,13 +28,13 @@ if( $resolved -is [System.IO.DirectoryInfo] )
     return
 }
 
-if( $resolved.Extension -in $pictures )
+if( ($resolved.Extension -in $pictures) -and (gcm chafa -ea Ignore) )
 {
     chafa $path
     return
 }
 
-if( $resolved.Extension -in $markdown )
+if( ($resolved.Extension -in $markdown) -and (gcm glow -ea Ignore) )
 {
     glow -s dark $path
     return

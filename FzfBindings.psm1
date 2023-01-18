@@ -1,16 +1,25 @@
 # Test that all dependencies are satisfied
-function SCRIPT:Assert-ToolInstalled( $name )
+function SCRIPT:Assert-ToolInstalled( $name, [switch] $IsWarning )
 {
     if( -not (Get-Command $name -ea Ignore) )
     {
-        throw "$name is needed, please install it first"
+        $info = "$name is needed, please install it first"
+
+        if( $IsWarning )
+        {
+            Write-Warning "$info, although it is not critical"
+        }
+        else
+        {
+            throw $info
+        }
     }
 }
 
 Assert-ToolInstalled fzf
 Assert-ToolInstalled bat
-Assert-ToolInstalled chafa
-Assert-ToolInstalled glow
+Assert-ToolInstalled chafa -IsWarning
+Assert-ToolInstalled glow -IsWarning
 
 $fzfVersion = (fzf --version) -split " " | select -f 1
 $fzfMinVersion = "0.31"
