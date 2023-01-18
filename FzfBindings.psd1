@@ -31,7 +31,7 @@
 
     # Aliases to export from this module
     AliasesToExport = @(
-        "cdf",
+        "cdf", # -
         "codef",
         "hf",
         "hlp",

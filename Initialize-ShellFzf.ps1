@@ -111,11 +111,15 @@ function Start-ProcessFzf($path)
 
     if( $destination )
     {
-        switch( Get-Platform )
+        if( $PSVersionTable.Platform -eq "Unix" )
         {
-            "Win32NT" { start $destination }
-            "Unix" { & $destination }
-            default { & $destination }
+            # Unix
+            & $destination
+        }
+        else
+        {
+            # Windows
+            start $destination
         }
     }
 }
@@ -227,7 +231,7 @@ function Push-LocationFzf
             $path
         }
 
-        if( Test-Unix )
+        if( $PSVersionTable.Platform -eq "Unix")
         {
             [io.path]::DirectorySeparatorChar
         }
