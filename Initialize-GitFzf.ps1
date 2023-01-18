@@ -108,7 +108,12 @@ function Send-GitBranch( $name )
     if( $created )
     {
         "PR creation - $($created.Branch) branch, opening browser to annotate PR"
-        start "URL"
+        $url = $env:FZF_BINDINGS_PR_URL
+        if( -not $url )
+        {
+            $url = git config --get remote.origin.url
+        }
+        start $url
     }
 }
 
@@ -256,12 +261,12 @@ function SCRIPT:Update-GitCheckoutBranch( $name )
 {
     git checkout $name *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git checkout $name'" }
-    if( -not $env:GIT_LINE_ENDINGS_MITIGATION ) { return }
+    if( -not $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION ) { return }
 
     # Line endings issue that would not go away until the problem will be fixed for good:
     # https://www.aleksandrhovhannisyan.com/blog/crlf-vs-lf-normalizing-line-endings-in-git/
     # https://developercommunity.visualstudio.com/t/git-undo-changes-on-files-that-differ-only-in-crlf/221309
-    $paths = $env:GIT_LINE_ENDINGS_MITIGATION -split ";"
+    $paths = $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION -split ";"
     $root = git rev-parse --show-toplevel
     foreach( $path in $paths )
     {
