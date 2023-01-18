@@ -229,7 +229,7 @@ function Push-LocationFzf
 
         if( Test-Unix )
         {
-            "/"
+            [io.path]::DirectorySeparatorChar
         }
     }
 
