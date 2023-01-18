@@ -1,6 +1,3 @@
-# Include all used files
-#. "$PSScriptRoot\..."
-
 # Test that all dependencies are satisfied
 function SCRIPT:Assert-ToolInstalled( $name )
 {
@@ -22,7 +19,13 @@ if( [version]::Parse($fzfVersion) -lt $fzfMinVersion )
     throw "fzf version $fzfVersion installed, but at least $fzfMinVersion is needed, please update it first"
 }
 
-# Setting up aliases
+# Include all used files in the right order
+. "$PSScriptRoot\Initialize-Vars.ps1"
+. "$PSScriptRoot\Initialize-ShellFzf.ps1"
+. "$PSScriptRoot\Initialize-PsReadLine.ps1"
+. "$PSScriptRoot\Initialize-GitFzf.ps1"
+
+# Set up aliases
 Set-Alias hlp Show-Help
 Set-Alias pf Show-PreviewFzf
 Set-Alias startf Start-ProcessFzf
