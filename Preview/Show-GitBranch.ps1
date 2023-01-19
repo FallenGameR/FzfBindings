@@ -6,7 +6,7 @@ if( -not $branch ) { return }
 function SCRIPT:e { "`e[" + ($args -join ";") + "m" }
 
 # Init
-"Branch $(e 36m)$branch$(e 0)"
+"Branch $(e 36)$branch$(e 0)"
 $prBranch = git branch --remotes --list branch "origin/dev/$env:USERNAME/$branch" | % trim
 if( $prBranch )
 {
@@ -26,7 +26,7 @@ $logParams = @(
 if( $branch -eq "master" )
 {
     "`n$(e 36)# Log$(e 0)`n"
-    $param = @("log", $branch "-100", $logParams)
+    $param = @("log", $branch, "-100", $logParams)
     git @param
     return
 }
