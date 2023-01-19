@@ -20,11 +20,11 @@ if( $resolved -is [System.IO.DirectoryInfo] )
     {
         $folder | ft -auto
 
-        if( (gcm disk -ea Ignore) )
+        if( (gcm dust -ea Ignore) )
         {
-            "`tSize on disk"
+            "`tSize: $resolved"
             ""
-            dust -r $folder
+            dust -r -c $resolved
         }
     }
     else
