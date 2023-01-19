@@ -29,18 +29,21 @@ if( [version]::Parse($fzfVersion) -lt $fzfMinVersion )
 }
 
 # Include all used files in the right order
-. "$PSScriptRoot\Initialize-Vars.ps1"
-. "$PSScriptRoot\Initialize-ShellFzf.ps1"
-. "$PSScriptRoot\Initialize-PsReadLine.ps1"
-. "$PSScriptRoot\Initialize-GitFzf.ps1"
+. "$PSScriptRoot\Initialize-Vars.ps1"       # Sets common variables, needs to go first
+. "$PSScriptRoot\Initialize-ShellFzf.ps1"   # Older portion of the codebase, safer to place first
+. "$PSScriptRoot\Initialize-GitFzf.ps1"     # Newer portion of the codebase, safer to place second
+. "$PSScriptRoot\Initialize-PsReadLine.ps1" # Sets shortcuts, needs to go last
 
 # Set up aliases
-Set-Alias hlp Show-Help
-Set-Alias pf Show-PreviewFzf
-Set-Alias startf Start-ProcessFzf
 Set-Alias cdf Set-LocationFzf
-Set-Alias killf Stop-ProcessFzf
-Set-Alias pushf Push-LocationFzf
-Set-Alias hf Invoke-HistoryFzf
+Set-Alias clrf Clear-GitBranch
 Set-Alias codef Invoke-CodeFzf
+Set-Alias cof Select-GitBranch
+Set-Alias hf Invoke-HistoryFzf
+Set-Alias hlp Show-Help
+Set-Alias killf Stop-ProcessFzf
+Set-Alias pf Show-PreviewFzf
+Set-Alias prf Send-GitBranch
+Set-Alias pushf Push-LocationFzf
 Set-Alias rgf Search-RipgrepFzf
+Set-Alias startf Start-ProcessFzf

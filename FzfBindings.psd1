@@ -32,11 +32,14 @@
     # Aliases to export from this module
     AliasesToExport = @(
         "cdf", # -
+        "clrf",
         "codef",
+        "cof",
         "hf",
         "hlp",
         "killf",
         "pf",
+        "prf",
         "pushf",
         "rgf",
         "startf"
