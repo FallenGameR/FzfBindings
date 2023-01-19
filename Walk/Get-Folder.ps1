@@ -21,13 +21,13 @@ $param = @()
 $param += $pwd
 $param += "-f" # don't show files, only directories
 
-foreach( $excluded in excluded_folders )
+foreach( $excluded in excluded_folders | where{ $psitem } )
 {
     $param += "-e"
     $param += $excluded
 }
 
-foreach( $included in included_folders )
+foreach( $included in included_folders | where{ $psitem } )
 {
     $param += "-I"
     $param += $included

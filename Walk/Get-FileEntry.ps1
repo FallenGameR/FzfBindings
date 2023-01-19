@@ -14,7 +14,7 @@ $walker = "$PsScriptRoot/../Bin/Walker/walker"
 $param = @()
 $param += $pwd
 
-foreach( $excluded in excluded_folders )
+foreach( $excluded in excluded_folders | where{ $psitem } )
 {
     $param += "-e"
     $param += $excluded
