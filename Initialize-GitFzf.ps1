@@ -192,7 +192,7 @@ function Clear-GitBranch( $name )
     }
 }
 
-function Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
+function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
 {
     $fzfArgs = @()
 

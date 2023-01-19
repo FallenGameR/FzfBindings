@@ -55,7 +55,6 @@
         "Push-LocationFzf",
         "Search-RipgrepFzf",
         "Select-GitBranch",
-        "Select-GitBranchFzf",
         "Send-GitBranch",
         "Set-LocationFzf",
         "Show-Help",
