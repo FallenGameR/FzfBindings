@@ -33,7 +33,6 @@ if( [version]::Parse($fzfVersion) -lt $fzfMinVersion )
 . "$PSScriptRoot\Initialize-Vars.ps1"       # Sets common variables, needs to go first
 . "$PSScriptRoot\Initialize-ShellFzf.ps1"   # Older portion of the codebase, safer to place first
 . "$PSScriptRoot\Initialize-GitFzf.ps1"     # Newer portion of the codebase, safer to place second
-. "$PSScriptRoot\Initialize-PsReadLine.ps1" # Sets shortcuts, needs to go last
 
 # Set up aliases
 Set-Alias cdf Set-LocationFzf

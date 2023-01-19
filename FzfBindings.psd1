@@ -71,7 +71,6 @@
         ".\FzfBindings.psd1",
         ".\FzfBindings.psm1",
         ".\Initialize-GitFzf.ps1",
-        ".\Initialize-PsReadLine.ps1",
         ".\Initialize-ShellFzf.ps1",
         ".\Initialize-Vars.ps1",
         ".\notes.md",
