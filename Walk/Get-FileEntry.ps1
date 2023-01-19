@@ -30,10 +30,45 @@ if( $PSVersionTable.Platform -ne "Unix" )
 
 if( Get-Item $walker -ea Ignore )
 {
-    & $walker @param
+    return & $walker @param
 }
-else
+
+# Until walker will be published to choco, let's not add the binary to the codebase
+Write-Warning "Could not find $walker, falling back to slow pwsh implementation"
+
+$commonPathPrefixLength = $pwd.ToString().Length + 1
+
+function find_files($root)
 {
-    Write-Warning "Could not find $walker, falling back to slow pwsh implementation"
-    <# Action when all if and elseif conditions are false #>
+    Get-ChildItem $root -File -ea Ignore
 }
+
+function find_folders($root)
+{
+    Get-ChildItem $root -Directory -ea Ignore
+}
+
+function normalize($path)
+{
+    $path.FullName.Substring($commonPathPrefixLength)
+}
+
+function find_recursive($root)
+{
+    # Read current level
+    $files = find_files $root | %{ normalize $psitem }
+    $folders = find_folders $root
+
+    # Output current level
+    $folders | %{ (normalize $psitem) + [io.path]::DirectorySeparatorChar }
+    $files
+
+    # Then recurse into every folder if it is not excluded
+    foreach( $folder in $folders | where Name -notin $excludedFolders )
+    {
+        find_recursive $folder
+    }
+}
+
+"."
+find_recursive "."
