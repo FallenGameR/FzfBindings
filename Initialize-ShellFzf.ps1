@@ -147,7 +147,11 @@ function Set-LocationFzf
     $fzfArgs = Get-PreviewArgsFzf $path
     $cdf = "$PSScriptRoot/Walk/Get-Folder.ps1"
 
-    $destination = @(& $cdf | fzf @fzfArgs)
+    $fzfPreserved = $env:FZF_DEFAULT_COMMAND
+    $env:FZF_DEFAULT_COMMAND = "$pwsh -nol -nop -wd $pwd -f $cdf"
+    try { $destination = @(fzf @fzfArgs) }
+    finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+
     $destination
 
     if( $destination.Length -eq 1 )
@@ -307,7 +311,11 @@ function Invoke-CodeFzf
     {
         $fzfArgs = Get-PreviewArgsFzf
         $codef = "$PSScriptRoot/Walk/Get-FileEntry.ps1"
-        $paths = @(& $codef | fzf @fzfArgs)
+
+        $fzfPreserved = $env:FZF_DEFAULT_COMMAND
+        $env:FZF_DEFAULT_COMMAND = "$pwsh -nol -nop -wd $pwd -f $codef"
+        try { $paths = @(fzf @fzfArgs) }
+        finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
     }
 
     if( -not $paths )
@@ -392,7 +400,7 @@ function Search-RipgrepFzf
         $rg += ($options -join " ") + " "
     }
 
-    $oldFzfCommand = $env:FZF_DEFAULT_COMMAND
+    $fzfPreserved = $env:FZF_DEFAULT_COMMAND
     $env:FZF_DEFAULT_COMMAND = "$rg ""$Query"""
 
     $result = try
@@ -421,7 +429,7 @@ function Search-RipgrepFzf
     }
     finally
     {
-        $env:FZF_DEFAULT_COMMAND = $oldFzfCommand
+        $env:FZF_DEFAULT_COMMAND = $fzfPreserved
     }
 
     $paths = $result |
