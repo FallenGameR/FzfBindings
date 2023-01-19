@@ -16,18 +16,21 @@ function included_folders
     $env:FZF_QUICK_PATHS -split [io.path]::PathSeparator
 }
 
+$excludedFolders = excluded_folders | where{ $psitem }
+$includedFolders = included_folders | where{ $psitem }
+
 $walker = "$PsScriptRoot/../Bin/Walker/walker"
 $param = @()
 $param += $pwd
 $param += "-f" # don't show files, only directories
 
-foreach( $excluded in excluded_folders | where{ $psitem } )
+foreach( $excluded in $excludedFolders )
 {
     $param += "-e"
     $param += $excluded
 }
 
-foreach( $included in included_folders | where{ $psitem } )
+foreach( $included in $includedFolders )
 {
     $param += "-I"
     $param += $included
@@ -39,4 +42,12 @@ if( $PSVersionTable.Platform -ne "Unix" )
     $param += "-D" # traverse into .directories
 }
 
-& $walker @param
+if( Get-Item $walker -ea Ignore )
+{
+    & $walker @param
+}
+else
+{
+    Write-Warning "Could not find $walker, falling back to slow pwsh implementation"
+    <# Action when all if and elseif conditions are false #>
+}

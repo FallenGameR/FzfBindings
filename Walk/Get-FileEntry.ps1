@@ -10,11 +10,13 @@ function excluded_folders
     Get-Content "$PsScriptRoot/../Data/excluded_folders"
 }
 
+$excludedFolders = excluded_folders | where{ $psitem }
+
 $walker = "$PsScriptRoot/../Bin/Walker/walker"
 $param = @()
 $param += $pwd
 
-foreach( $excluded in excluded_folders | where{ $psitem } )
+foreach( $excluded in $excludedFolders )
 {
     $param += "-e"
     $param += $excluded
@@ -26,4 +28,12 @@ if( $PSVersionTable.Platform -ne "Unix" )
     $param += "-D" # traverse into .directories
 }
 
-& $walker @param
+if( Get-Item $walker -ea Ignore )
+{
+    & $walker @param
+}
+else
+{
+    Write-Warning "Could not find $walker, falling back to slow pwsh implementation"
+    <# Action when all if and elseif conditions are false #>
+}
