@@ -6,7 +6,7 @@
     RootModule = 'FzfBindings.psm1'
 
     # Version number of this module.
-    ModuleVersion = '0.1.0.20230117'
+    ModuleVersion = '0.1.1.20230120'
 
     # ID used to uniquely identify this module
     GUID = 'fb98390c-1080-4d3a-ab8a-439d02e995f6'
@@ -72,7 +72,6 @@
         ".\FzfBindings.psm1",
         ".\Initialize-GitFzf.ps1",
         ".\Initialize-ShellFzf.ps1",
-        ".\Initialize-Vars.ps1",
         ".\notes.md",
         ".\readme.md",
         ".\Bin\.gitignore",

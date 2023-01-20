@@ -29,10 +29,13 @@ if( [version]::Parse($fzfVersion) -lt $fzfMinVersion )
     throw "fzf version $fzfVersion installed, but at least $fzfMinVersion is needed, please update it first"
 }
 
-# Include all used files in the right order
-. "$PSScriptRoot\Initialize-Vars.ps1"       # Sets common variables, needs to go first
-. "$PSScriptRoot\Initialize-ShellFzf.ps1"   # Older portion of the codebase, safer to place first
-. "$PSScriptRoot\Initialize-GitFzf.ps1"     # Newer portion of the codebase, safer to place second
+# Cross platform way to call pwsh
+$SCRIPT:pwsh = "pwsh"
+if( $PSVersionTable.Platform -ne "Unix" ) { $SCRIPT:pwsh += ".exe" }
+
+# Include all used files
+. "$PSScriptRoot\Initialize-ShellFzf.ps1"
+. "$PSScriptRoot\Initialize-GitFzf.ps1"
 
 # Set up aliases
 Set-Alias cdf Set-LocationFzf
