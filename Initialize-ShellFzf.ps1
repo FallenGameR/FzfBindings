@@ -37,7 +37,7 @@ function Show-Help
     }
 }
 
-function SCRIPT:Get-PreviewArgsFzf( $path )
+function Get-PreviewArgsFzf( $path )
 {
     $fzfArgs =
         "--margin", "1%",
@@ -145,10 +145,8 @@ function Set-LocationFzf
     )
 
     $fzfArgs = Get-PreviewArgsFzf $path
-    $cdf = "$PSScriptRoot/Walk/Get-Folder.ps1"
-
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-    $env:FZF_DEFAULT_COMMAND = "$pwsh -nol -nop -wd $pwd -f $cdf"
+    $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-Folder.ps1"
     try { $destination = @(fzf @fzfArgs) }
     finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
 
@@ -310,10 +308,8 @@ function Invoke-CodeFzf
     if( -not $paths )
     {
         $fzfArgs = Get-PreviewArgsFzf
-        $codef = "$PSScriptRoot/Walk/Get-FileEntry.ps1"
-
         $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-        $env:FZF_DEFAULT_COMMAND = "$pwsh -nol -nop -wd $pwd -f $codef"
+        $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
         try { $paths = @(fzf @fzfArgs) }
         finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
     }
