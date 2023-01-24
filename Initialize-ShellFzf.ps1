@@ -145,10 +145,12 @@ function Set-LocationFzf
     )
 
     $fzfArgs = Get-PreviewArgsFzf $path
-    $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-    $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-Folder.ps1"
-    try { $destination = @(fzf @fzfArgs) }
-    finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+    #$fzfPreserved = $env:FZF_DEFAULT_COMMAND
+    #$env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-Folder.ps1"
+    #try { $destination = @(fzf @fzfArgs) }
+    #finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+
+    $destination = @(& "$PSScriptRoot/Walk/Get-Folder.ps1" | fzf @fzfArgs)
 
     $destination
 
@@ -308,10 +310,11 @@ function Invoke-CodeFzf
     if( -not $paths )
     {
         $fzfArgs = Get-PreviewArgsFzf
-        $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-        $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
-        try { $paths = @(fzf @fzfArgs) }
-        finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+        #$fzfPreserved = $env:FZF_DEFAULT_COMMAND
+        #$env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
+        #try { $paths = @(fzf @fzfArgs) }
+        #finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+        $paths = @(& "$PSScriptRoot/Walk/Get-FileEntry.ps1" | fzf @fzfArgs)
     }
 
     if( -not $paths )
