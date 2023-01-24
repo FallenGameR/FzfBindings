@@ -228,6 +228,7 @@ function Push-LocationFzf
         $parts = $pwd -split "\\|/"
         $path = $parts | select -f 1
         $paths = @()
+        $path + [io.path]::DirectorySeparatorChar
 
         foreach( $part in $parts[1..($parts.Length-2)] )
         {
