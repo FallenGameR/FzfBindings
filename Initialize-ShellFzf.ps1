@@ -105,7 +105,7 @@ function Get-PreviewArgsFzf( $path )
         "--padding", "1%",
         "--border",
         "--keep-right",
-        "--preview", "$pwsh -nop -f $PSScriptRoot/../FZF/Preview-CodeF.ps1 {}",
+        "--preview", "$pwsh -nop -f $PSScriptRoot/Preview/Show-FileEntry.ps1 {}",
         "--preview-window=55%"
 
     $executedFromCode = (gps -id $pid | % parent | % name) -eq "Code"
@@ -202,7 +202,7 @@ function Set-LocationFzf
     )
 
     $fzfArgs = Get-PreviewArgsFzf $path
-    $cdf = "$PSScriptRoot/../FZF/Invoke-Cdf.ps1"
+    $cdf = "$PSScriptRoot/Walk/Get-Folder.ps1"
 
     $destination = @(& $cdf | fzf @fzfArgs)
     $destination
@@ -363,7 +363,7 @@ function Invoke-CodeFzf
     if( -not $paths )
     {
         $fzfArgs = Get-PreviewArgsFzf
-        $codef = "$PSScriptRoot/../FZF/Invoke-Codef.ps1"
+        $codef = "$PSScriptRoot/Walk/Get-FileEntry.ps1"
         $paths = @(& $codef | fzf @fzfArgs)
     }
 
