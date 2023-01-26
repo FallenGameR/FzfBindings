@@ -70,7 +70,15 @@ function Select-GitBranch( $name )
     $selected = $branches | Select-GitBranchFzf Branch $name | select -f 1
     if( -not $selected ) { return }
 
-    Update-GitCheckoutBranch $selected.Branch
+    $current = Resolve-GitBranch "HEAD"
+    if( $selected.Branch -ne $current )
+    {
+        Update-GitCheckoutBranch $selected.Branch
+    }
+    else
+    {
+        "Already on branch $current"
+    }
 }
 
 function Send-GitBranch( $name )
@@ -100,7 +108,12 @@ function Send-GitBranch( $name )
     if( $created )
     {
         "PR creation - $($created.Branch) branch, opening browser to annotate PR"
-        start "https://msazure.visualstudio.com/One/_git/Azure-Compute-Move/pullrequests?_a=mine"
+        $url = $env:FZF_BINDINGS_PR_URL
+        if( -not $url )
+        {
+            $url = git config --get remote.origin.url
+        }
+        start $url
     }
 }
 
@@ -179,28 +192,21 @@ function Clear-GitBranch( $name )
     }
 }
 
-function Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
+function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
 {
     $fzfArgs = @()
 
-    # Main view
+    # Main view, in adding to default args
     $fzfArgs += "--header-lines=$header"    # Table header
-    $fzfArgs += "--layout=reverse"          # Grow list down, not upwards
-    $fzfArgs += "--tabstop=4"               # Standard tab size
-    $fzfArgs += "--cycle"                   # Cycle the list
-    $fzfArgs += "--ansi"                    # Use Powershell colors
-    $fzfArgs += "--no-mouse"                # We need terminal mouse behavior, not custom one
     $fzfArgs += "--info=hidden"             # Finder info style
     $fzfArgs += "--multi"                   # Allow multi selection
 
     # Pre view
-    $root = $PSScriptRoot
-    if( -not $root ) { $root = "." }        # For debug
     $fzfArgs += "--margin", "1%"            # To set some borders
     $fzfArgs += "--padding", "1%"           # To set some borders
     $fzfArgs += "--border"                  # To set some borders
     $fzfArgs += "--keep-right"              # Preview to the right
-    $fzfArgs += "--preview", "pwsh.exe -nop -f $root/Import-GitBranchPreview.ps1 {}"
+    $fzfArgs += "--preview", "$pwsh -nop -f $PSScriptRoot/Preview/Show-GitBranch.ps1 {}"
     $fzfArgs += "--preview-window=60%"      # Preview size
 
     # fzf filter
@@ -216,14 +222,6 @@ function Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
         where{ $psitem -match "^(\S+)"} |
         foreach{ $matches[1]} |
         foreach{ $value = $psitem; $objects | where{ $psitem.$key -eq $value } }
-}
-
-function SCRIPT:Assert-FzfInstalled
-{
-    if( -not (gcm fzf) )
-    {
-        throw "fzf is needed, please install it first"
-    }
 }
 
 function SCRIPT:Assert-GitEmptyStatus
@@ -263,12 +261,12 @@ function SCRIPT:Update-GitCheckoutBranch( $name )
 {
     git checkout $name *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git checkout $name'" }
-    if( -not $env:GIT_LINE_ENDINGS_MITIGATION ) { return }
+    if( -not $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION ) { return }
 
     # Line endings issue that would not go away until the problem will be fixed for good:
     # https://www.aleksandrhovhannisyan.com/blog/crlf-vs-lf-normalizing-line-endings-in-git/
     # https://developercommunity.visualstudio.com/t/git-undo-changes-on-files-that-differ-only-in-crlf/221309
-    $paths = $env:GIT_LINE_ENDINGS_MITIGATION -split ";"
+    $paths = $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION -split ";"
     $root = git rev-parse --show-toplevel
     foreach( $path in $paths )
     {
@@ -314,5 +312,3 @@ function SCRIPT:Update-GitReset( $name )
 
     "> Git reset --hard $name - done"
 }
-
-Assert-FzfInstalled
