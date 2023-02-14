@@ -1,63 +1,3 @@
-$fzfOptions = @(
-    "--layout=reverse",             # Grow list down, not upwards
-    "--tabstop=4",                  # Standard tab size
-    "--multi",                      # Multi select possible
-    "--bind",                       # Shortcuts:
-    "alt-t:toggle-all",             # Alt+t toggles selection
-    "--cycle",                      # Cycle the list
-    "--ansi",                       # Use Powershell colors
-    "--no-mouse",                   # We need terminal mouse behavior, not custom one
-    "--tiebreak='length,index'",    # Priorities to resolve ties (index comes last always)
-    "--color=bg:#0C0C0C",           # Background (current line) = Black
-    "--color=bg+:#0C0C0C",          # Background (current line) = Black
-    "--color=fg+:#F2F2F2",          # Text (current line) = White
-    "--color=hl+:#13A10E",          # Highlighted substrings (current line) = DarkGreen
-    "--color=pointer:#3A96DD",      # Pointer to the current line = DarkCyan
-    "--color=preview-bg:#0C0C0C",   # Preview window background = Black
-    "--color=prompt:#CCCCCC"        # Prompt = Gray
-
-    #"--height 60%"                 # Leave some space intact - breaks cyrillic typing, bug created
-    #"--color=bg:#RRGGBB",          # Background
-    #"--color=bg+:#RRGGBB",         # Background (current line)
-    #"--color=border:#RRGGBB",      # Border of the preview window and horizontal separators (--border)
-    #"--color=fg:#RRGGBB",          # Text
-    #"--color=fg+:#RRGGBB",         # Text (current line)
-    #"--color=gutter:#RRGGBB",      # Gutter on the left (defaults to bg+)
-    #"--color=header:#RRGGBB",      # Header
-    #"--color=hl:#RRGGBB",          # Highlighted substrings
-    #"--color=hl+:#RRGGBB",         # Highlighted substrings (current line)
-    #"--color=info:#RRGGBB",        # Info
-    #"--color=marker:#RRGGBB",      # Multi-select marker
-    #"--color=pointer:#RRGGBB",     # Pointer to the current line
-    #"--color=preview-bg:#RRGGBB",  # Preview window background
-    #"--color=preview-fg:#RRGGBB",  # Preview window text
-    #"--color=prompt:#RRGGBB",      # Prompt
-    #"--color=spinner:#RRGGBB",     # Streaming input indicator
-)
-$env:FZF_DEFAULT_OPTS = $fzfOptions -join " "
-
-$SCRIPT:pwsh = "pwsh"
-if( Test-Windows ) { $SCRIPT:pwsh += ".exe" }
-
-Register-Shortcut "Alt+h" "hf" "History search"
-Register-Shortcut "Alt+o" "startf" "Open file"
-Register-Shortcut "Alt+r" "rgf" "Ripgrep search"
-Register-Shortcut "Alt+k" "killf" "Kill process"
-Register-Shortcut "Alt+f" "codef" "Code to open file or directory"
-Register-Shortcut "Alt+v" "codef" "Code to open file or directory (shortcut from Vim"
-Register-Shortcut "Alt+d" "cdf" "Change directory"
-Register-Shortcut "Alt+u" "pushf" "Go up fuzzy"
-
-Set-Alias hlp Show-Help
-Set-Alias pf Show-PreviewFzf
-Set-Alias startf Start-ProcessFzf
-Set-Alias cdf Set-LocationFzf
-Set-Alias killf Stop-ProcessFzf
-Set-Alias pushf Push-LocationFzf
-Set-Alias hf Invoke-HistoryFzf
-Set-Alias codef Invoke-CodeFzf
-Set-Alias rgf Search-RipgrepFzf
-
 function Show-Help
 {
     <#
@@ -97,7 +37,6 @@ function Show-Help
     }
 }
 
-# SCRIPT: after debugging
 function Get-PreviewArgsFzf( $path )
 {
     $fzfArgs =
@@ -172,11 +111,15 @@ function Start-ProcessFzf($path)
 
     if( $destination )
     {
-        switch( Get-Platform )
+        if( $PSVersionTable.Platform -eq "Unix" )
         {
-            "Win32NT" { start $destination }
-            "Unix" { & $destination }
-            default { & $destination }
+            # Unix
+            & $destination
+        }
+        else
+        {
+            # Windows
+            start $destination
         }
     }
 }
@@ -202,9 +145,13 @@ function Set-LocationFzf
     )
 
     $fzfArgs = Get-PreviewArgsFzf $path
-    $cdf = "$PSScriptRoot/Walk/Get-Folder.ps1"
+    #$fzfPreserved = $env:FZF_DEFAULT_COMMAND
+    #$env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-Folder.ps1"
+    #try { $destination = @(fzf @fzfArgs) }
+    #finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
 
-    $destination = @(& $cdf | fzf @fzfArgs)
+    $destination = @(& "$PSScriptRoot/Walk/Get-Folder.ps1" | fzf @fzfArgs)
+
     $destination
 
     if( $destination.Length -eq 1 )
@@ -281,6 +228,7 @@ function Push-LocationFzf
         $parts = $pwd -split "\\|/"
         $path = $parts | select -f 1
         $paths = @()
+        $path + [io.path]::DirectorySeparatorChar
 
         foreach( $part in $parts[1..($parts.Length-2)] )
         {
@@ -288,9 +236,9 @@ function Push-LocationFzf
             $path
         }
 
-        if( Test-Unix )
+        if( $PSVersionTable.Platform -eq "Unix")
         {
-            "/"
+            [io.path]::DirectorySeparatorChar
         }
     }
 
@@ -363,8 +311,11 @@ function Invoke-CodeFzf
     if( -not $paths )
     {
         $fzfArgs = Get-PreviewArgsFzf
-        $codef = "$PSScriptRoot/Walk/Get-FileEntry.ps1"
-        $paths = @(& $codef | fzf @fzfArgs)
+        #$fzfPreserved = $env:FZF_DEFAULT_COMMAND
+        #$env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
+        #try { $paths = @(fzf @fzfArgs) }
+        #finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+        $paths = @(& "$PSScriptRoot/Walk/Get-FileEntry.ps1" | fzf @fzfArgs)
     }
 
     if( -not $paths )
@@ -449,7 +400,7 @@ function Search-RipgrepFzf
         $rg += ($options -join " ") + " "
     }
 
-    $oldFzfCommand = $env:FZF_DEFAULT_COMMAND
+    $fzfPreserved = $env:FZF_DEFAULT_COMMAND
     $env:FZF_DEFAULT_COMMAND = "$rg ""$Query"""
 
     $result = try
@@ -478,7 +429,7 @@ function Search-RipgrepFzf
     }
     finally
     {
-        $env:FZF_DEFAULT_COMMAND = $oldFzfCommand
+        $env:FZF_DEFAULT_COMMAND = $fzfPreserved
     }
 
     $paths = $result |
@@ -493,5 +444,3 @@ function Search-RipgrepFzf
         codef $paths
     }
 }
-
-tm (Split-Path $PSCommandPath -Leaf)
