@@ -283,7 +283,7 @@ function SCRIPT:Update-GitCheckoutBranch( $name )
 
 function SCRIPT:Update-GitMerge( $name )
 {
-    git merge $name *> $null
+    git merge $name -X theirs *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git merge $name" }
 
     "> Git merge $name - done"
