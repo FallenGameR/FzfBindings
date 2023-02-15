@@ -1,3 +1,5 @@
+# Clear-GitBranch or Select-GitBranch messes up with the prompt
+
 function Get-GitBranch
 {
     $names = git for-each-ref --format "%(refname:short)" refs/heads/
