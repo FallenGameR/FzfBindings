@@ -18,7 +18,6 @@ function SCRIPT:Assert-ToolInstalled( $name, [switch] $IsWarning )
 
 Assert-ToolInstalled fzf
 Assert-ToolInstalled bat
-Assert-ToolInstalled dust -IsWarning
 Assert-ToolInstalled chafa -IsWarning
 Assert-ToolInstalled glow -IsWarning
 
