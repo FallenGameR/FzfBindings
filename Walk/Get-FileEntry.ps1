@@ -5,24 +5,18 @@
 # - allow fzf to terminate output early (piped in input blocks fzf from exit)
 #
 
-# Spell-checker: disable
 function excluded_folders
 {
-    ".git"
-    ".pkgrefgen"
-    "bin"
-    "obj"
-    "objd"
-    "target"
-    "TestResults"
+    Get-Content "$PsScriptRoot/../Data/excluded_folders"
 }
-# Spell-checker: enable
+
+$excludedFolders = excluded_folders | where{ $psitem }
 
 $walker = "$PsScriptRoot/../Bin/Walker/walker"
 $param = @()
 $param += $pwd
 
-foreach( $excluded in excluded_folders )
+foreach( $excluded in $excludedFolders )
 {
     $param += "-e"
     $param += $excluded
@@ -34,4 +28,47 @@ if( $PSVersionTable.Platform -ne "Unix" )
     $param += "-D" # traverse into .directories
 }
 
-& $walker @param
+if( Get-Item $walker -ea Ignore )
+{
+    return & $walker @param
+}
+
+# Until walker will be published to choco, let's not add the binary to the codebase
+Write-Warning "Could not find $walker, falling back to slow pwsh implementation"
+
+$commonPathPrefixLength = $pwd.ToString().Length + 1
+
+function find_files($root)
+{
+    Get-ChildItem $root -File -ea Ignore
+}
+
+function find_folders($root)
+{
+    Get-ChildItem $root -Directory -ea Ignore
+}
+
+function normalize($path)
+{
+    $path.FullName.Substring($commonPathPrefixLength)
+}
+
+function find_recursive($root)
+{
+    # Read current level
+    $files = find_files $root | %{ normalize $psitem }
+    $folders = find_folders $root
+
+    # Output current level
+    $folders | %{ (normalize $psitem) + [io.path]::DirectorySeparatorChar }
+    $files
+
+    # Then recurse into every folder if it is not excluded
+    foreach( $folder in $folders | where Name -notin $excludedFolders )
+    {
+        find_recursive $folder
+    }
+}
+
+"."
+find_recursive "."
