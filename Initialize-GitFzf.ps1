@@ -293,7 +293,7 @@ function SCRIPT:Update-GitMerge( $name )
 
 function SCRIPT:Update-GitPull
 {
-    git pull *> $null
+    git pull
     if( $LASTEXITCODE -notin @(0,128) ) { throw "Could not complete wihtout errors 'git pull" }
 
     "> Git pull - done"
