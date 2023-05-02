@@ -8,10 +8,15 @@ function Get-GitBranch
     $itemes = foreach( $name in $names )
     {
         $prBranch = git branch --remotes --list branch "origin/dev/$env:USERNAME/$name" | % trim
+
         $contains = @($names |
             where{ $psitem -ne $name } |
             where{ $psitem -ne "master" } |
             where{ git merge-base $psitem --is-ancestor $name; $LASTEXITCODE -eq 0 } )
+
+        # %cr is committer date, relative, e.g. "2 weeks ago"
+        # %ci is committer date, ISO 8601-like format, e.g. "2020-04-20 14:00:00 +0200"
+        $relative, $absolute = (git log master -1 --pretty=format:'%cr#%ci') -split "#"
 
         $properties = [ordered] @{
             Name = $name
@@ -22,6 +27,8 @@ function Get-GitBranch
             AffectsBranches = @()
             UpstreamBranch = Resolve-GitBranch "$name@{upstream}"
             PullRequestStatus = "Unknown"
+            RelativeDate = $relative
+            AbsoluteDate = [datetimeoffset]::Parse($absolute)
         }
 
         $properties.PullRequestStatus =
@@ -46,11 +53,12 @@ function Get-GitBranch
 }
 function Get-GitPrBranch
 {
-    $itemes = Get-GitBranch
+    $itemes = Get-GitBranch | sort AbsoluteDate -Descending
 
     $itemesReadable = $itemes | select `
         @{ Label = "Branch"; Expression = { $psitem.Name } },
         @{ Label = "Status"; Expression = { $psitem.PullRequestStatus } },
+        @{ Label = "Updated"; Expression = { $psitem.RelativeDate } },
         @{ Label = "Affects"; Expression = { $psitem.AffectsBranches } }
 
     $sort =
