@@ -27,13 +27,13 @@ $param += "-f" # don't show files, only directories
 foreach( $excluded in $excludedFolders )
 {
     $param += "-e"
-    $param +=  '\"' + $excluded + '\"'
+    $param +=  '"' + $excluded + '"'
 }
 
 foreach( $included in $includedFolders )
 {
     $param += "-I"
-    $param += '\"' + $included + '\"'
+    $param += '"' + $included + '"'
 }
 
 if( $PSVersionTable.Platform -ne "Unix" )
@@ -46,7 +46,9 @@ if( Get-Item $walker -ea Ignore )
 {
     # Calling it as & walker makes console to mess up the formatting
     # Trying out the process start approach for now
-    # NOTE: folders and files with spaces in names will need to be quoted somehow
+    # Folders and files with spaces are escaped with single quotation arguments
+    # and the quotes are not being sent to the target app as per the documentation
+    # https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo.arguments?view=net-8.0
 
     $process = [Diagnostics.Process] @{
         StartInfo = [Diagnostics.ProcessStartInfo] @{
