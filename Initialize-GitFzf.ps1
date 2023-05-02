@@ -16,7 +16,7 @@ function Get-GitBranch
 
         # %cr is committer date, relative, e.g. "2 weeks ago"
         # %ci is committer date, ISO 8601-like format, e.g. "2020-04-20 14:00:00 +0200"
-        $relative, $absolute = (git log master -1 --pretty=format:'%cr#%ci') -split "#"
+        $relative, $absolute = (git log $name -1 --pretty=format:'%cr#%ci') -split "#"
 
         $properties = [ordered] @{
             Name = $name
@@ -27,7 +27,7 @@ function Get-GitBranch
             AffectsBranches = @()
             UpstreamBranch = Resolve-GitBranch "$name@{upstream}"
             PullRequestStatus = "Unknown"
-            RelativeDate = $relative
+            RelativeDate = $relative -replace " ago", ""
             AbsoluteDate = [datetimeoffset]::Parse($absolute)
         }
 
@@ -53,19 +53,21 @@ function Get-GitBranch
 }
 function Get-GitPrBranch
 {
-    $itemes = Get-GitBranch | sort AbsoluteDate -Descending
+    $itemes = Get-GitBranch
 
     $itemesReadable = $itemes | select `
         @{ Label = "Branch"; Expression = { $psitem.Name } },
         @{ Label = "Status"; Expression = { $psitem.PullRequestStatus } },
-        @{ Label = "Updated"; Expression = { $psitem.RelativeDate } },
-        @{ Label = "Affects"; Expression = { $psitem.AffectsBranches } }
+        @{ Label = "Freshness"; Expression = { $psitem.RelativeDate } },
+        @{ Label = "Affects"; Expression = { $psitem.AffectsBranches } },
+        @{ Label = "AbsoluteDate"; Expression = { $psitem.AbsoluteDate } }
 
     $sort =
+        @{ Expression = "AbsoluteDate"; Descending = $true },
         @{ Expression = "Status"; Descending = $true },
         @{ Expression = "Name"; Descending = $false }
 
-    $itemesReadable | sort $sort
+    $itemesReadable | sort $sort | select Branch, Status, Freshness, Affects
 }
 
 function Select-GitBranch( $name )
