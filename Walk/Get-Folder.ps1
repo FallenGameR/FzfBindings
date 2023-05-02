@@ -44,7 +44,21 @@ if( $PSVersionTable.Platform -ne "Unix" )
 
 if( Get-Item $walker -ea Ignore )
 {
-    return & $walker @param
+    # Calling it as & walker makes console to mess up the formatting
+    # Trying out the process start approach for now
+    # NOTE: folders and files with spaces in names will need to be quoted somehow
+
+    $process = [Diagnostics.Process] @{
+        StartInfo = [Diagnostics.ProcessStartInfo] @{
+            FileName = $walker
+            Arguments = $param -join " "
+            WorkingDirectory = (Get-Location).Path
+            UseShellExecute = $false
+        }
+    }
+    $process.Start()
+    $process.WaitForExit()
+    return
 }
 
 # Until walker will be published to choco, let's not add the binary to the codebase
