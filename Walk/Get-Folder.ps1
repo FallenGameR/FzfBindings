@@ -27,13 +27,13 @@ $param += "-f" # don't show files, only directories
 foreach( $excluded in $excludedFolders )
 {
     $param += "-e"
-    $param += $excluded
+    $param +=  '\"' + $excluded + '\"'
 }
 
 foreach( $included in $includedFolders )
 {
     $param += "-I"
-    $param += $included
+    $param += '\"' + $included + '\"'
 }
 
 if( $PSVersionTable.Platform -ne "Unix" )
@@ -56,7 +56,7 @@ if( Get-Item $walker -ea Ignore )
             UseShellExecute = $false
         }
     }
-    $process.Start()
+    $process.Start() | Out-Null
     $process.WaitForExit()
     return
 }
