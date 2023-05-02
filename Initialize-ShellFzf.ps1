@@ -148,10 +148,10 @@ function Set-LocationFzf
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
     # This way of calling FZF messes up with the prompt
-    #$env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-Folder.ps1"
-    #try { $destination = @(fzf @fzfArgs) }
-    #finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
-    $destination = @(& "$PSScriptRoot/Walk/Get-Folder.ps1" | fzf @fzfArgs)
+    $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-Folder.ps1"
+    try { $destination = @(fzf @fzfArgs) }
+    finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+    #$destination = @(& "$PSScriptRoot/Walk/Get-Folder.ps1" | fzf @fzfArgs)
 
     $destination
 
