@@ -147,10 +147,12 @@ function Set-LocationFzf
     $fzfArgs = Get-PreviewArgsFzf $path
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-    # This way of calling FZF messes up with the prompt
     $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-Folder.ps1"
     try { $destination = @(fzf @fzfArgs) }
     finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+
+    # This is a slower way to do the same. But there is a related walker/pwsh/FZF bug
+    # that can be mitigated this way. But recently I found a workaround for that bug.
     #$destination = @(& "$PSScriptRoot/Walk/Get-Folder.ps1" | fzf @fzfArgs)
 
     $destination
