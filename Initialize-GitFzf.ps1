@@ -9,10 +9,20 @@ function Get-GitBranch
     {
         $prBranch = git branch --remotes --list branch "origin/dev/$env:USERNAME/$name" | % trim
 
+        # Not sure if it is needed anymore
         $contains = @($names |
             where{ $psitem -ne $name } |
             where{ $psitem -ne "master" } |
             where{ git merge-base $psitem --is-ancestor $name; $LASTEXITCODE -eq 0 } )
+
+        $affects = @($names |
+            where{ $psitem -ne $name } |
+            where{ $psitem -ne "master" } |
+            where {
+                $base = git merge-base $psitem $name
+                git merge-base $base --is-ancestor "master"
+                $LASTEXITCODE -eq 1
+            } )
 
         # %cr is committer date, relative, e.g. "2 weeks ago"
         # %ci is committer date, ISO 8601-like format, e.g. "2020-04-20 14:00:00 +0200"
@@ -24,7 +34,7 @@ function Get-GitBranch
             WasPullRequestSent = [bool] $prBranch
             HasUnreviewedChanges = $prBranch -and (-not (Test-GitPointAtSameCommit $name $prBranch))
             ContainsBranches = $contains
-            AffectsBranches = @()
+            AffectsBranches = $affects
             UpstreamBranch = Resolve-GitBranch "$name@{upstream}"
             PullRequestStatus = "Unknown"
             RelativeDate = $relative -replace " ago", ""
@@ -33,7 +43,7 @@ function Get-GitBranch
 
         $properties.PullRequestStatus =
             if( $name -eq "master" ) { "PR None" }
-            elseif( $properties.ContainsBranches ) { "PR Blocked" }
+            elseif( $properties.AffectsBranches ) { "PR Blocked" }
             elseif( $properties.WasPullRequestSent )
             {
                 if( $properties.HasUnreviewedChanges ) { "PR Update" }
@@ -42,11 +52,6 @@ function Get-GitBranch
             else { "PR Create" }
 
         New-Object -TypeName PSObject -Property $properties
-    }
-
-    foreach( $item in $itemes )
-    {
-        $item.AffectsBranches = @($itemes | where{ $item.Name -in $psitem.ContainsBranches } | foreach Name)
     }
 
     $itemes
@@ -93,13 +98,15 @@ function Select-GitBranch( $name )
     }
 }
 
-function Send-GitBranch( $name )
+function Send-GitBranch( $name, [switch] $Force )
 {
     "PR creation - Check git status"
     Assert-GitEmptyStatus
 
     "PR creation - Getting branches"
-    $branches = Get-GitPrBranch | where Status -Match "Create|Update"
+    $status = "Create|Update"
+    if( $forced ) { $status = "$status|Blocked" }
+    $branches = Get-GitPrBranch | where Status -Match $status
 
     "PR creation - Branch selection"
     if( -not $branches ) { return }
@@ -129,14 +136,16 @@ function Send-GitBranch( $name )
     }
 }
 
-function Clear-GitBranch( $name )
+function Clear-GitBranch( $name, [switch] $Force )
 {
     "PR cleanup - Check git status"
     Assert-GitEmptyStatus
 
     "PR cleanup - Getting branches"
     # Create is needed since in some cases we compelted PR and there is is no local mention of the remove branch
-    $branches = Get-GitPrBranch | where Status -Match "Exists|Create"
+    $status = "Create|Exists"
+    if( $force ) { $status = "$status|Blocked" }
+    $branches = Get-GitPrBranch | where Status -Match $status
     # Current branch can be null if we didn't select it
     $current = $branches | where IsCurrent
 
