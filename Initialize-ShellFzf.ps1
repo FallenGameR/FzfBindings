@@ -314,11 +314,15 @@ function Invoke-CodeFzf
     if( -not $paths )
     {
         $fzfArgs = Get-PreviewArgsFzf
-        #$fzfPreserved = $env:FZF_DEFAULT_COMMAND
-        #$env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
-        #try { $paths = @(fzf @fzfArgs) }
-        #finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
-        $paths = @(& "$PSScriptRoot/Walk/Get-FileEntry.ps1" | fzf @fzfArgs)
+
+        $fzfPreserved = $env:FZF_DEFAULT_COMMAND
+        $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
+        try { $paths = @(fzf @fzfArgs) }
+        finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+
+        # This is a slower way to do the same. But there is a related walker/pwsh/FZF bug
+        # that can be mitigated this way. But recently I found a workaround for that bug.
+        #$paths = @(& "$PSScriptRoot/Walk/Get-FileEntry.ps1" | fzf @fzfArgs)
     }
 
     if( -not $paths )

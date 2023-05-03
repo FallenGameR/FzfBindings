@@ -48,6 +48,7 @@ if( Get-Item $walker -ea Ignore )
     # Calling walker with & while using FZF_DEFAULT_COMMAND makes console to
     # mess up the output formatting in some cases. It seems like CR is not being
     # processed correctly after some walker incocations from FZF.
+    #return & $walker @param
 
     # Trying out the process start approach for now.
 
