@@ -215,6 +215,8 @@ function Clear-GitBranch( $name, [switch] $Force )
 
 function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
 {
+    # NOTE: it looks like this call ocasionally messes up the CR symbols in the terminal
+    # is caused by preview? There is no FZF_COMMAND replacement here.
     $fzfArgs = @()
 
     # Main view, in adding to default args
