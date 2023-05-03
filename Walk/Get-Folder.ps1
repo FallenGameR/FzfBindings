@@ -27,13 +27,14 @@ $param += "-f" # don't show files, only directories
 foreach( $excluded in $excludedFolders )
 {
     $param += "-e"
-    $param +=  '"' + $excluded + '"'
+    $param += $excluded
+
 }
 
 foreach( $included in $includedFolders )
 {
     $param += "-I"
-    $param += '"' + $included + '"'
+    $param += $included
 }
 
 if( $PSVersionTable.Platform -ne "Unix" )
@@ -44,10 +45,17 @@ if( $PSVersionTable.Platform -ne "Unix" )
 
 if( Get-Item $walker -ea Ignore )
 {
-    # Calling it as & walker makes console to mess up the formatting
-    # Trying out the process start approach for now
-    # Folders and files with spaces are escaped with single quotation arguments
-    # and the quotes are not being sent to the target app as per the documentation
+    # Calling walker with & while using FZF_DEFAULT_COMMAND makes console to
+    # mess up the output formatting in some cases. It seems like CR is not being
+    # processed correctly after some walker incocations from FZF.
+
+    # Trying out the process start approach for now.
+
+    # Folders and files with spaces should be escaped with single quotation arguments
+    # but when I'm trying to do that something gets broken along the way, so
+    # for now we don't do any escaping so that non-space-containing paths would
+    # be processed. And in the mean time I gather info what doesn't work.
+
     # https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo.arguments?view=net-8.0
 
     $process = [Diagnostics.Process] @{
