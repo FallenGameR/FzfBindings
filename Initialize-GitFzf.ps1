@@ -260,7 +260,7 @@ function SCRIPT:Assert-GitCleanMaster
 {
     # There is no user commit in master. Meaning master is reachable from origin/master
     # that may went ahead through previous fetch that left master as is.
-    git merge-base "master" --is-ancestor "origin/master"; $LASTEXITCODE
+    git merge-base "master" --is-ancestor "origin/master"
 
     if( $LASTEXITCODE -ne 0 )
     {
