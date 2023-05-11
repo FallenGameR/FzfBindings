@@ -258,9 +258,13 @@ function SCRIPT:Assert-GitEmptyStatus
 
 function SCRIPT:Assert-GitCleanMaster
 {
-    if( -not (Test-GitPointAtSameCommit "master" "origin/master") )
+    # There is no user commit in master. Meaning master is reachable from origin/master
+    # that may went ahead through previous fetch that left master as is.
+    git merge-base "master" --is-ancestor "origin/master"; $LASTEXITCODE
+
+    if( $LASTEXITCODE -ne 0 )
     {
-        throw "Git master needs to be the same as origin/master"
+        throw "Git master needs to be clean, it must be reachable from origin/master"
     }
 }
 
