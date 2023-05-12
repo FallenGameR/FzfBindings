@@ -307,13 +307,14 @@ function Invoke-CodeFzf
 
     param
     (
-        $Paths
+        $Paths,
+        $Filter
     )
 
     # Select paths
     if( -not $paths )
     {
-        $fzfArgs = Get-PreviewArgsFzf
+        $fzfArgs = Get-PreviewArgsFzf $Filter
 
         $fzfPreserved = $env:FZF_DEFAULT_COMMAND
         $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
