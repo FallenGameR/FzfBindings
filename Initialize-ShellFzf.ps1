@@ -305,38 +305,50 @@ function Invoke-CodeFzf
         location in that file in case it is provided.
     #>
 
+    [cmdletbinding()]
     param
     (
-        $Paths,
-        $Filter
+        [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
+        $Path
     )
 
-    # Select paths
-    if( -not $paths )
+    begin
     {
-        $fzfArgs = Get-PreviewArgsFzf $Filter
-
-        $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-        $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
-        try { $paths = @(fzf @fzfArgs) }
-        finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
-
-        # This is a slower way to do the same. But there is a related walker/pwsh/FZF bug
-        # that can be mitigated this way. But recently I found a workaround for that bug.
-        #$paths = @(& "$PSScriptRoot/Walk/Get-FileEntry.ps1" | fzf @fzfArgs)
+        $paths = @()
     }
-
-    if( -not $paths )
+    process
     {
-        return
+        $paths += $path
     }
-
-    # Invoke code
-    foreach( $path in $paths )
+    end
     {
-        $invoke = "code --goto ""{0}""" -f $path
-        $invoke
-        code --goto $path
+        # Select paths
+        if( -not $paths )
+        {
+            $fzfArgs = Get-PreviewArgsFzf
+
+            $fzfPreserved = $env:FZF_DEFAULT_COMMAND
+            $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
+            try { $paths = @(fzf @fzfArgs) }
+            finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
+
+            # This is a slower way to do the same. But there is a related walker/pwsh/FZF bug
+            # that can be mitigated this way. But recently I found a workaround for that bug.
+            #$paths = @(& "$PSScriptRoot/Walk/Get-FileEntry.ps1" | fzf @fzfArgs)
+        }
+
+        if( -not $paths )
+        {
+            return
+        }
+
+        # Invoke code
+        foreach( $path in $paths )
+        {
+            $invoke = "code --goto ""{0}""" -f $path
+            $invoke
+            code --goto $path
+        }
     }
 }
 
