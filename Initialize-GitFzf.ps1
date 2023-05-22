@@ -288,6 +288,13 @@ function SCRIPT:Update-GitCheckoutBranch( $name )
 {
     git checkout $name *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git checkout $name'" }
+
+    Update-GitLineEndingsMitigation
+    "> Git checkout $name - done"
+}
+
+function Update-GitLineEndingsMitigation
+{
     if( -not $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION ) { return }
 
     # Line endings issue that would not go away until the problem will be fixed for good:
@@ -304,8 +311,6 @@ function SCRIPT:Update-GitCheckoutBranch( $name )
             "> Git update-index --assume-unchanged $path - done"
         }
     }
-
-    "> Git checkout $name - done"
 }
 
 function SCRIPT:Update-GitMerge( $name )

@@ -6,7 +6,7 @@
     RootModule = 'FzfBindings.psm1'
 
     # Version number of this module.
-    ModuleVersion = '0.1.4.20230511'
+    ModuleVersion = '0.1.5.20230522'
 
     # ID used to uniquely identify this module
     GUID = 'fb98390c-1080-4d3a-ab8a-439d02e995f6'
@@ -60,7 +60,8 @@
         "Show-Help",
         "Show-PreviewFzf",
         "Start-ProcessFzf",
-        "Stop-ProcessFzf"
+        "Stop-ProcessFzf",
+        "Update-GitLineEndingsMitigation"
     )
 
     # Modules that must be imported into the global environment prior to importing this module
