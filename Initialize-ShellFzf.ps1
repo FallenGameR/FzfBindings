@@ -464,3 +464,31 @@ function Search-RipgrepFzf
         codef $paths
     }
 }
+
+function Repair-ConsoleMode
+{
+    <#
+    .SYNOPSIS
+        fzf sets DISABLE_NEWLINE_AUTO_RETURN console mode flag that breaks the console.
+        This command can be used to restore the correct console mode.
+
+    .NOTES
+        https://github.com/junegunn/fzf/issues/3334
+    #>
+
+    $GetStdHandle = '[DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr GetStdHandle(int nStdHandle);'
+    $GetConsoleMode = '[DllImport("kernel32.dll", SetLastError = true)] public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);'
+    $SetConsoleMode = '[DllImport("kernel32.dll", SetLastError = true)] public static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint lpMode);'
+    $Kernel32 = Add-Type `
+        -Name 'Kernel32' `
+        -Namespace 'Win32' `
+        -PassThru `
+        -MemberDefinition "$GetStdHandle $GetConsoleMode $SetConsoleMode"
+
+    [uint] $mode = 0
+    $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode) | Out-Null
+
+    $DISABLE_NEWLINE_AUTO_RETURN = 0x8
+    $mode = $mode -band (-bnot $DISABLE_NEWLINE_AUTO_RETURN)
+    $Kernel32::SetConsoleMode($Kernel32::GetStdHandle(-11), $mode) | Out-Null
+}
