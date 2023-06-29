@@ -96,6 +96,9 @@ function Select-GitBranch( $name )
     {
         "Already on branch $current"
     }
+
+    # Sometimes fzf messes up the console mode
+    Repair-ConsoleMode
 }
 
 function Send-GitBranch( $name, [switch] $Force )
