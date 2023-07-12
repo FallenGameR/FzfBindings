@@ -82,10 +82,15 @@ function Select-GitBranch( $name )
 
     "Branch selection - Getting branches"
     $branches = Get-GitPrBranch
-
     if( -not $branches ) { return }
+
     $selected = $branches | Select-GitBranchFzf Branch $name | select -f 1
-    if( -not $selected ) { return }
+    if( -not $selected )
+    {
+        # Sometimes fzf messes up the console mode
+        Repair-ConsoleMode
+        return
+    }
 
     $current = Resolve-GitBranch "HEAD"
     if( $selected.Branch -ne $current )
