@@ -214,6 +214,9 @@ function Clear-GitBranch( $name, [switch] $Force )
         Remove-GitBranch $branch
         "PR cleanup - Safe deleted '$branch'"
     }
+
+    # Sometimes fzf messes up the console mode
+    Repair-ConsoleMode
 }
 
 function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
