@@ -3,6 +3,7 @@
 function Get-GitBranch
 {
     $names = git for-each-ref --format "%(refname:short)" refs/heads/
+    $master = Resolve-GitMasterBranch
     $current = Resolve-GitBranch "HEAD"
 
     $itemes = foreach( $name in $names )
@@ -11,18 +12,16 @@ function Get-GitBranch
 
         # Not sure if it is needed anymore
         $contains = @($names |
-            where{ $psitem -ne $name } |
-            where{ $psitem -ne "master" } |
+            where{ $psitem -notmatch "(^$name|$master)$" } |
             where{ git merge-base $psitem --is-ancestor $name; $LASTEXITCODE -eq 0 } )
 
         $affects = @($names |
-            where{ $psitem -ne $name } |
-            where{ $psitem -ne "master" } |
-            where {
-                $base = git merge-base $psitem $name
-                git merge-base $base --is-ancestor "master"
-                $LASTEXITCODE -eq 1
-            } )
+        where{ $psitem -notmatch "(^$name|$master)$" } |
+        where{
+            $base = git merge-base $psitem $name
+            git merge-base $base --is-ancestor $master
+            $LASTEXITCODE -eq 1
+        })
 
         # %cr is committer date, relative, e.g. "2 weeks ago"
         # %ci is committer date, ISO 8601-like format, e.g. "2020-04-20 14:00:00 +0200"
@@ -42,7 +41,7 @@ function Get-GitBranch
         }
 
         $properties.PullRequestStatus =
-            if( $name -eq "master" ) { "PR None" }
+            if( $name -match "^(master|main)$" ) { "PR None" }
             elseif( $properties.AffectsBranches ) { "PR Blocked" }
             elseif( $properties.WasPullRequestSent )
             {
@@ -144,10 +143,26 @@ function Send-GitBranch( $name, [switch] $Force )
     }
 }
 
+function Resolve-GitMasterBranch
+{
+    if( git rev-parse --verify "master" 2>$null )
+    {
+        return "master"
+    }
+
+    if( git rev-parse --verify "main" 2>$null )
+    {
+        return "main"
+    }
+
+    throw "Unknown master branch name"
+}
+
 function Clear-GitBranch( $name, [switch] $Force )
 {
     "PR cleanup - Check git status"
     Assert-GitEmptyStatus
+    $master = Resolve-GitMasterBranch
 
     "PR cleanup - Getting branches"
     # Create is needed since in some cases we compelted PR and there is is no local mention of the remove branch
@@ -171,7 +186,7 @@ function Clear-GitBranch( $name, [switch] $Force )
     # Work from the latest master
     "PR cleanup - Updating master"
     Assert-GitCleanMaster
-    Update-GitCheckoutBranch "master"
+    Update-GitCheckoutBranch $master
     Update-GitPull
 
     # Clear the branches
@@ -181,7 +196,7 @@ function Clear-GitBranch( $name, [switch] $Force )
     {
         "PR cleanup - '$($item.Branch)' branch, temp merge with master to make sure PR was fully merged"
         Update-GitCheckoutBranch $item.Branch
-        Update-GitMerge "master"
+        Update-GitMerge $master
 
         "PR cleanup - '$($item.Branch)' branch, testing the merge commit"
         $extraChanges = git diff head..head^2
@@ -206,8 +221,8 @@ function Clear-GitBranch( $name, [switch] $Force )
 
     # Go back to the current branch if it was not deleted or to master
     $returnToBranch = $current.Branch
-    if( -not $returnToBranch ) { $returnToBranch = "master" }
-    if( $returnToBranch -in $toDelete ) { $returnToBranch = "master" }
+    if( -not $returnToBranch ) { $returnToBranch = $master }
+    if( $returnToBranch -in $toDelete ) { $returnToBranch = $master }
     "PR cleanup - Restoring $returnToBranch branch"
     Update-GitCheckoutBranch $returnToBranch
     "PR cleanup - Restored $returnToBranch branch"
@@ -269,13 +284,15 @@ function SCRIPT:Assert-GitEmptyStatus
 
 function SCRIPT:Assert-GitCleanMaster
 {
+    $master = Resolve-GitMasterBranch
+
     # There is no user commit in master. Meaning master is reachable from origin/master
     # that may went ahead through previous fetch that left master as is.
-    git merge-base "master" --is-ancestor "origin/master"
+    git merge-base $master --is-ancestor "origin/$master"
 
     if( $LASTEXITCODE -ne 0 )
     {
-        throw "Git master needs to be clean, it must be reachable from origin/master"
+        throw "Git $master needs to be clean, it must be reachable from origin/$master"
     }
 }
 

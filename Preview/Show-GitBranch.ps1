@@ -7,13 +7,14 @@ function SCRIPT:e { "`e[" + ($args -join ";") + "m" }
 
 # Init
 "Branch $(e 36)$branch$(e 0)"
+$master = Resolve-GitMasterBranch
 $prBranch = git branch --remotes --list branch "origin/dev/$env:USERNAME/$branch" | % trim
 if( $prBranch )
 {
     $isSameCommit = (git rev-parse --verify $branch) -eq (git rev-parse --verify $prBranch)
     if( $isSameCommit ) { $prBranch = $null }
 }
-$diffStart = if( $prBranch ) { $prBranch } else { git merge-base $branch "origin/master" }
+$diffStart = if( $prBranch ) { $prBranch } else { git merge-base $branch "origin/$master" }
 $logParams = @(
     "--color=always",
     "--graph",
@@ -23,7 +24,7 @@ $logParams = @(
 )
 
 # Master branch
-if( $branch -eq "master" )
+if( $branch -eq $master )
 {
     "`n$(e 36)# Log$(e 0)`n"
     $param = @("log", $branch, "-100", $logParams)
