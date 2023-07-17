@@ -175,7 +175,11 @@ function Clear-GitBranch( $name, [switch] $Force )
     "PR cleanup - Branch selection"
     if( -not $branches ) { return }
     $selected = $branches | Select-GitBranchFzf Branch $name
-    if( -not $selected ) { return }
+    if( -not $selected )
+    {
+        Repair-ConsoleMode
+        return
+    }
 
     "PR cleanup - Branch verification"
     $sent = @($selected | foreach Branch)
