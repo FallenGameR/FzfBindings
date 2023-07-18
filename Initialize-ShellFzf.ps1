@@ -161,6 +161,8 @@ function Set-LocationFzf
     {
         cd $destination[0]
     }
+
+    Repair-ConsoleMode
 }
 
 function Stop-ProcessFzf
@@ -201,6 +203,8 @@ function Stop-ProcessFzf
         $id = $split[4]
         Stop-Process -Id $id -Verbose -ea Ignore
     }
+
+    Repair-ConsoleMode
 }
 
 function Push-LocationFzf
@@ -283,6 +287,8 @@ function Invoke-HistoryFzf
         $command
         Invoke-Expression $command
     }
+
+    Repair-ConsoleMode
 }
 
 function Invoke-CodeFzf
@@ -349,6 +355,8 @@ function Invoke-CodeFzf
             $invoke
             code --goto $path
         }
+
+        Repair-ConsoleMode
     }
 }
 
@@ -463,6 +471,8 @@ function Search-RipgrepFzf
     {
         codef $paths
     }
+
+    Repair-ConsoleMode
 }
 
 function Repair-ConsoleMode
