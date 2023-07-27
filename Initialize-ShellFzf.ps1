@@ -495,7 +495,7 @@ function Repair-ConsoleMode
         -PassThru `
         -MemberDefinition "$GetStdHandle $GetConsoleMode $SetConsoleMode"
 
-    [uint] $mode = 0
+    [UInt32] $mode = 0
     $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode) | Out-Null
 
     $DISABLE_NEWLINE_AUTO_RETURN = 0x8
