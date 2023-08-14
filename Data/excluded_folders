@@ -2,6 +2,7 @@
 .pkgrefgen
 bin
 cache
+drop
 obj
 objd
 out

@@ -12,6 +12,22 @@ function excluded_folders
 
 $excludedFolders = excluded_folders | where{ $psitem }
 
+# fd is faster and maintained way to do the same stuff as walker
+# it doesn't understand hidden windows folders though
+if( Get-Command fd -ea Ignore )
+{
+    $fd = @("-HI")
+
+    foreach( $excluded in $excludedFolders )
+    {
+        $fd += "-E"
+        $fd += $excluded
+    }
+
+    & fd @fd
+    return
+}
+
 $walker = "$PsScriptRoot/../Bin/Walker/walker"
 $param = @()
 $param += $pwd
@@ -27,6 +43,7 @@ if( $PSVersionTable.Platform -ne "Unix" )
     $walker += ".exe"
     $param += "-D" # traverse into .directories
 }
+
 
 if( Get-Item $walker -ea Ignore )
 {
