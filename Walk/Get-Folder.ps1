@@ -16,8 +16,31 @@ function included_folders
     $env:FZF_QUICK_PATHS -split [io.path]::PathSeparator
 }
 
+filter normalize_quick_access
+{
+    $psitem | where{ Test-Path $psitem -ea Ignore } | foreach{ [System.IO.Path]::GetFullPath($psitem) }
+}
+
 $excludedFolders = excluded_folders | where{ $psitem }
 $includedFolders = included_folders | where{ $psitem }
+
+# fd is faster and maintained way to do the same stuff as walker
+# it doesn't understand hidden windows folders though
+if( Get-Command fd -ea Ignore )
+{
+    $includedFolders | normalize_quick_access
+
+    $fd = @("-HI", "-t", "d")
+
+    foreach( $excluded in $excludedFolders )
+    {
+        $fd += "-E"
+        $fd += $excluded
+    }
+
+    & fd @fd
+    return
+}
 
 $walker = "$PsScriptRoot/../Bin/Walker/walker"
 $param = @()
@@ -28,7 +51,6 @@ foreach( $excluded in $excludedFolders )
 {
     $param += "-e"
     $param += $excluded
-
 }
 
 foreach( $included in $includedFolders )
@@ -100,10 +122,7 @@ function find_recursive($root)
     }
 }
 
-filter normalize_quick_access
-{
-    $psitem | where{ Test-Path $psitem -ea Ignore } | foreach{ [System.IO.Path]::GetFullPath($psitem) }
-}
+
 
 $includedFolders | normalize_quick_access
 find_recursive "."
