@@ -16,7 +16,7 @@ $excludedFolders = excluded_folders | where{ $psitem }
 # it doesn't understand hidden windows folders though
 if( Get-Command fd -ea Ignore )
 {
-    $fd = @("-HI")
+    $fd = @("-HI", "--color=always")
 
     foreach( $excluded in $excludedFolders )
     {

@@ -30,7 +30,7 @@ if( Get-Command fd -ea Ignore )
 {
     $includedFolders | normalize_quick_access
 
-    $fd = @("-HI", "-t", "d")
+    $fd = @("-HI", "-t", "d", "--color=always")
 
     foreach( $excluded in $excludedFolders )
     {
