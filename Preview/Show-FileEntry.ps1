@@ -28,6 +28,9 @@ if( $resolved -is [System.IO.DirectoryInfo] )
 
         "`n$(e 36)# Contents$(e 0)`n"
         $rendered -split [environment]::NewLine | where{ $psitem } | select -skip 1
+        #Push-Location $path
+        #fd --max-depth 1 --color always -l
+        #Pop-Location
     }
     else
     {
