@@ -325,26 +325,6 @@ function SCRIPT:Update-GitCheckoutBranch( $name )
     "> Git checkout $name - done"
 }
 
-function Update-GitLineEndingsMitigation
-{
-    if( -not $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION ) { return }
-
-    # Line endings issue that would not go away until the problem will be fixed for good:
-    # https://www.aleksandrhovhannisyan.com/blog/crlf-vs-lf-normalizing-line-endings-in-git/
-    # https://developercommunity.visualstudio.com/t/git-undo-changes-on-files-that-differ-only-in-crlf/221309
-    $paths = $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION -split ";"
-    $root = git rev-parse --show-toplevel
-    foreach( $path in $paths )
-    {
-        $path = Get-Item (Join-Path $root $path) -ea Ignore | % FullName
-        if( $path )
-        {
-            git update-index --assume-unchanged $path 2>$null
-            "> Git update-index --assume-unchanged $path - done"
-        }
-    }
-}
-
 function SCRIPT:Update-GitMerge( $name )
 {
     git merge $name -X theirs *> $null
@@ -375,4 +355,24 @@ function SCRIPT:Update-GitReset( $name )
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git reset --hard $name" }
 
     "> Git reset --hard $name - done"
+}
+
+function Update-GitLineEndingsMitigation
+{
+    if( -not $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION ) { return }
+
+    # Line endings issue that would not go away until the problem will be fixed for good:
+    # https://www.aleksandrhovhannisyan.com/blog/crlf-vs-lf-normalizing-line-endings-in-git/
+    # https://developercommunity.visualstudio.com/t/git-undo-changes-on-files-that-differ-only-in-crlf/221309
+    $paths = $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION -split ";"
+    $root = git rev-parse --show-toplevel
+    foreach( $path in $paths )
+    {
+        $path = Get-Item (Join-Path $root $path) -ea Ignore | % FullName
+        if( $path )
+        {
+            git update-index --assume-unchanged $path 2>$null
+            "> Git update-index --assume-unchanged $path - done"
+        }
+    }
 }
