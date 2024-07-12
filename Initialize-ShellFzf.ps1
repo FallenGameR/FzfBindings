@@ -44,7 +44,7 @@ function Get-PreviewArgsFzf( $path )
         "--padding", "1%",
         "--border",
         "--keep-right",
-        "--preview", "$pwsh -nop -f $PSScriptRoot/Preview/Show-FileEntry.ps1 {}",
+        "--preview", "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}",
         "--preview-window=55%"
 
     $executedFromCode = (gps -id $pid | % parent | % name) -eq "Code"
@@ -147,7 +147,7 @@ function Set-LocationFzf
     $fzfArgs = Get-PreviewArgsFzf $path
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-    $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-Folder.ps1"
+    $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-Folder.ps1"""
     try { $destination = @(fzf @fzfArgs) }
     finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
 
@@ -334,7 +334,7 @@ function Invoke-CodeFzf
             $fzfArgs = Get-PreviewArgsFzf
 
             $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-            $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f $PSScriptRoot/Walk/Get-FileEntry.ps1"
+            $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""
             try { $paths = @(fzf @fzfArgs) }
             finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
 

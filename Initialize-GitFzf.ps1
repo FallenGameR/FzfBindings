@@ -259,7 +259,7 @@ function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
     $fzfArgs += "--padding", "1%"           # To set some borders
     $fzfArgs += "--border"                  # To set some borders
     $fzfArgs += "--keep-right"              # Preview to the right
-    $fzfArgs += "--preview", "$pwsh -nop -f $PSScriptRoot/Preview/Show-GitBranch.ps1 {}"
+    $fzfArgs += "--preview", "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-GitBranch.ps1"" {}"
     $fzfArgs += "--preview-window=60%"      # Preview size
 
     # fzf filter
