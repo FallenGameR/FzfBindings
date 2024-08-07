@@ -292,9 +292,14 @@ function SCRIPT:Assert-GitEmptyStatus
     if( $LASTEXITCODE ) { throw "Git status is not empty, please clean it first" }
 
     # Ignore the whitespace changes
-    $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION += ";"
+    git status --porcelain |
+        where{ $psitem -match "^\s*M\s+(?<path>.+)$" } |
+        foreach{ $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION += ";$($Matches["path"])" }
     Update-GitLineEndingsMitigation
 
+    # Check if status is empty
+    git diff --quiet 2>$null
+    if( $LASTEXITCODE ) { throw "Git status is not empty, please clean it first" }
 }
 
 function SCRIPT:Assert-GitCleanMaster
