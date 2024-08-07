@@ -279,7 +279,7 @@ function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
 
 function SCRIPT:Assert-GitEmptyStatus
 {
-    git diff --quiet
+    git diff -w --quiet
     if( $LASTEXITCODE )
     {
         throw "Git status is not empty, please clean it first"
