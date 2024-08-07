@@ -144,6 +144,8 @@ function Set-LocationFzf
         [string] $Path
     )
 
+    trap { Repair-ConsoleMode }
+
     $fzfArgs = Get-PreviewArgsFzf $path
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
@@ -183,6 +185,8 @@ function Stop-ProcessFzf
     (
         [string] $Name
     )
+
+    trap { Repair-ConsoleMode }
 
     $fzfArgs = @()
     $fzfArgs += "--header-lines=3"  # PS output table header
@@ -269,6 +273,8 @@ function Invoke-HistoryFzf
         - Alt+a argument highlight (Unix only)
     #>
 
+    trap { Repair-ConsoleMode }
+
     # Get history reversed
     $commands = @(Get-History)
     [array]::Reverse($commands)
@@ -328,6 +334,8 @@ function Invoke-CodeFzf
     }
     end
     {
+        trap { Repair-ConsoleMode }
+
         # Select paths
         if( -not $paths )
         {
@@ -402,6 +410,8 @@ function Search-RipgrepFzf
         [switch] $NoRecasing,
         [switch] $NoEditor
     )
+
+    trap { Repair-ConsoleMode }
 
     if( -not $NoRecasing )
     {

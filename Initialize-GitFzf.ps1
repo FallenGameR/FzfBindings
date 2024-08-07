@@ -76,6 +76,8 @@ function Get-GitPrBranch
 
 function Select-GitBranch( $name )
 {
+    trap { Repair-ConsoleMode }
+
     "Branch selection - Check git status"
     Assert-GitEmptyStatus
 
@@ -160,6 +162,8 @@ function Resolve-GitMasterBranch
 
 function Clear-GitBranch( $name, [switch] $Force )
 {
+    trap { Repair-ConsoleMode }
+
     "PR cleanup - Check git status"
     Assert-GitEmptyStatus
     $master = Resolve-GitMasterBranch
@@ -279,11 +283,18 @@ function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
 
 function SCRIPT:Assert-GitEmptyStatus
 {
+    # Check if status is empty
+    git diff --quiet 2>$null
+    if( -not $LASTEXITCODE ){ return }
+
+    # Detect if there is some unresettable whitespace changes
     git diff -w --quiet 2>$null
-    if( $LASTEXITCODE )
-    {
-        throw "Git status is not empty, please clean it first"
-    }
+    if( $LASTEXITCODE ) { throw "Git status is not empty, please clean it first" }
+
+    # Ignore the whitespace changes
+    $env:FZF_BINDINGS_GIT_LINE_ENDINGS_MITIGATION += ";"
+    Update-GitLineEndingsMitigation
+
 }
 
 function SCRIPT:Assert-GitCleanMaster
