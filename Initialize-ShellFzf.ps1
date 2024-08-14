@@ -383,6 +383,12 @@ function Search-RipgrepFzf
     .PARAMETER Options
         Options that will be passed to ripgrep
 
+    .PARAMETER Hidden
+        Grep in the normally hidden files (like history)
+
+    .PARAMETER NoIgnore
+        Grep in the normally ignored files (like binaries excluded by .gitignore)
+
     .PARAMETER NoRecasing
         I use ripgrep with the default --ignore-case argument that makes rg
         to ignore case but only if the input is in lowercase. That feels strange -
@@ -407,6 +413,8 @@ function Search-RipgrepFzf
     (
         [Parameter(Mandatory=$true)] $Query,
         [Parameter(Mandatory=$false, ValueFromRemainingArguments=$true)] $Options,
+        [switch] $Hidden,
+        [switch] $NoIgnore,
         [switch] $NoRecasing,
         [switch] $NoEditor
     )
@@ -436,6 +444,16 @@ function Search-RipgrepFzf
     if( $options )
     {
         $rg += ($options -join " ") + " "
+    }
+
+    if( $Hidden )
+    {
+        $rg += "--hidden "
+    }
+
+    if( $NoIgnore )
+    {
+        $rg += "--no-ignore "
     }
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
