@@ -82,7 +82,7 @@ function Select-GitBranch( $name )
     Assert-GitEmptyStatus
 
     "Branch selection - Getting branches"
-    $branches = Get-GitPrBranch
+    $branches = Get-GitPrBranch | select Branch, Freshness, Status
     if( -not $branches ) { return }
 
     $selected = $branches | Select-GitBranchFzf Branch $name | select -f 1
