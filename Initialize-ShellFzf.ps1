@@ -137,11 +137,22 @@ function Set-LocationFzf
     .PARAMETER Path
         Part of the folder path to for initial filtration.
         Or just do the search interactively with fzf.
+
+    .PARAMETER Hidden
+        Show hidden folders, these are the ones that start with .
+
+    .PARAMETER NoIgnore
+        Show folders that are excluded via .gitignore.
+
+        Note that in case these folders are commited, they would still
+        be treated as ignored.
     #>
 
     param
     (
-        [string] $Path
+        [string] $Path,
+        [switch] $Hidden,
+        [switch] $NoIgnore
     )
 
     trap { Repair-ConsoleMode }
@@ -150,6 +161,8 @@ function Set-LocationFzf
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
     $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-Folder.ps1"""
+    if( $Hidden ) { $env:FZF_DEFAULT_COMMAND += " -Hidden" }
+    if( $NoIgnore ) { $env:FZF_DEFAULT_COMMAND += " -NoIgnore" }
     try { $destination = @(fzf @fzfArgs) }
     finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
 

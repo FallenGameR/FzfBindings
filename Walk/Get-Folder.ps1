@@ -3,6 +3,12 @@
 # - in what order do we see the output (similar to ls order)
 # - make sure that we use command that is OneDrive friendly (Linux find downloads everything while enumerating)
 # - allow fzf to terminate output early (piped in input blocks fzf from exit)
+[CmdletBinding()]
+param
+(
+    [switch] $Hidden,
+    [switch] $NoIgnore
+)
 
 function excluded_folders
 {
@@ -30,7 +36,17 @@ if( Get-Command fd -ea Ignore )
 {
     $includedFolders | normalize_quick_access
 
-    $fd = @("-HI", "-t", "d", "--color=always")
+    $fd = @("-t", "d", "--color=always")
+
+    if( $Hidden )
+    {
+        $fd += "-H"
+    }
+
+    if( $NoIgnore )
+    {
+        $fd += "-I"
+    }
 
     foreach( $excluded in $excludedFolders )
     {
