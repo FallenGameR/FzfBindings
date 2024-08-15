@@ -76,12 +76,16 @@ function Get-GitPrBranch
 
 function Select-GitBranch( $name )
 {
-    trap { Repair-ConsoleMode }
+    trap
+    {
+        Repair-ConsoleMode
+        Write-Progress "Branch selection" -Completed
+    }
 
-    "Branch selection - Check git status"
+    Write-Progress "Branch selection" "Check git status"
     Assert-GitEmptyStatus
 
-    "Branch selection - Getting branches"
+    Write-Progress "Branch selection" "Getting branches"
     $branches = Get-GitPrBranch | select Branch, Freshness, Status
     if( -not $branches ) { return }
 
@@ -109,33 +113,38 @@ function Select-GitBranch( $name )
 
 function Send-GitBranch( $name, [switch] $Force )
 {
-    "PR creation - Check git status"
+    trap
+    {
+        Write-Progress "PR creation" -Completed
+    }
+
+    Write-Progress "PR creation" "Check git status"
     Assert-GitEmptyStatus
 
-    "PR creation - Getting branches"
+    Write-Progress "PR creation" "Getting branches"
     $status = "Create|Update"
     if( $forced ) { $status = "$status|Blocked" }
     $branches = Get-GitPrBranch | where Status -Match $status
 
-    "PR creation - Branch selection"
+    Write-Progress "PR creation" "Branch selection"
     if( -not $branches ) { return }
     $selected = $branches | Select-GitBranchFzf Branch $name
     if( -not $selected ) { return }
 
-    "PR creation - Branch verification"
+    Write-Progress "PR creation" "Branch verification"
     $created = @($selected | where Status -Match "Create")
     if( $created.Length -gt 1 ) { throw "It is possible to create only one PR at a time. Please send PRs for $(($created | % Branch) -join ',') separatelly"}
 
-    "PR creation - Branch send to origin"
+    Write-Progress "PR creation" "Branch send to origin"
     foreach( $item in $selected )
     {
-        "PR creation - $($item.Branch) branch, pushing branch to origin"
+        Write-Progress "PR creation" "$($item.Branch) branch, pushing branch to origin"
         Update-GitPush "$($item.Branch):dev/$env:username/$($item.Branch)"
     }
 
     if( $created )
     {
-        "PR creation - $($created.Branch) branch, opening browser to annotate PR"
+        Write-Progress "PR creation" "$($created.Branch) branch, opening browser to annotate PR"
         $url = $env:FZF_BINDINGS_PR_URL
         if( -not $url )
         {
@@ -162,13 +171,17 @@ function Resolve-GitMasterBranch
 
 function Clear-GitBranch( $name, [switch] $Force )
 {
-    trap { Repair-ConsoleMode }
+    trap
+    {
+        Repair-ConsoleMode
+        Write-Progress "PR cleanup" -Completed
+    }
 
-    "PR cleanup - Check git status"
+    Write-Progress "PR cleanup" "Check git status"
     Assert-GitEmptyStatus
     $master = Resolve-GitMasterBranch
 
-    "PR cleanup - Getting branches"
+    Write-Progress "PR cleanup" "Getting branches"
     # Create is needed since in some cases we compelted PR and there is is no local mention of the remove branch
     $status = "Create|Exists"
     if( $force ) { $status = "$status|Blocked" }
@@ -176,7 +189,7 @@ function Clear-GitBranch( $name, [switch] $Force )
     # Current branch can be null if we didn't select it
     $current = $branches | where IsCurrent
 
-    "PR cleanup - Branch selection"
+    Write-Progress "PR cleanup" "Branch selection"
     if( -not $branches ) { return }
     $selected = $branches | Select-GitBranchFzf Branch $name
     if( -not $selected )
@@ -185,43 +198,43 @@ function Clear-GitBranch( $name, [switch] $Force )
         return
     }
 
-    "PR cleanup - Branch verification"
+    Write-Progress "PR cleanup" "Branch verification"
     $sent = @($selected | foreach Branch)
     $affected = @($selected | foreach{ $psitem.Affects })
     $conflicts = Compare-Object $sent $affected -PassThru -IncludeEqual -ExcludeDifferent
     if( $conflicts ) { throw "Selected combination of branches conflicts in shared changes: $($conflicts -join ','). Please clear branches separetelly." }
 
     # Work from the latest master
-    "PR cleanup - Updating master"
+    Write-Progress "PR cleanup" "Updating master"
     Assert-GitCleanMaster
     Update-GitCheckoutBranch $master
     Update-GitPull
 
     # Clear the branches
     $toDelete = @()
-    "PR cleanup - Clear the branches"
+    Write-Progress "PR cleanup" "Clear the branches"
     foreach( $item in $selected )
     {
-        "PR cleanup - '$($item.Branch)' branch, temp merge with master to make sure PR was fully merged"
+        Write-Progress "PR cleanup" "'$($item.Branch)' branch, temp merge with master to make sure PR was fully merged"
         Update-GitCheckoutBranch $item.Branch
         Update-GitMerge $master
 
-        "PR cleanup - '$($item.Branch)' branch, testing the merge commit"
+        Write-Progress "PR cleanup" "'$($item.Branch)' branch, testing the merge commit"
         $extraChanges = git diff head..head^2
         if( $extraChanges )
         {
-            "PR cleanup - '$($item.Branch)' branch, reverting due to extra changes"
+            Write-Progress "PR cleanup" "'$($item.Branch)' branch, reverting due to extra changes"
             Update-GitReset "head~1"
-            "PR cleanup - '$($item.Branch)' branch reverted, there are extra changes in it that were not present in master. PR was not completed."
+            Write-Progress "PR cleanup" "'$($item.Branch)' branch reverted, there are extra changes in it that were not present in master. PR was not completed."
             continue
         }
 
         foreach( $affected in $item.Affects )
         {
-            "PR cleanup - '$($item.Branch)' branch, updating affected branch $affected"
+            Write-Progress "PR cleanup" "'$($item.Branch)' branch, updating affected branch $affected"
             Update-GitCheckoutBranch $affected
             Update-GitMerge $item.Branch
-            "PR cleanup - '$($item.Branch)' branch, update of affected branch $affected done"
+            Write-Progress "PR cleanup" "'$($item.Branch)' branch, update of affected branch $affected done"
         }
 
         $toDelete += $item.Branch
@@ -231,16 +244,16 @@ function Clear-GitBranch( $name, [switch] $Force )
     $returnToBranch = $current.Branch
     if( -not $returnToBranch ) { $returnToBranch = $master }
     if( $returnToBranch -in $toDelete ) { $returnToBranch = $master }
-    "PR cleanup - Restoring $returnToBranch branch"
+    Write-Progress "PR cleanup" "Restoring $returnToBranch branch"
     Update-GitCheckoutBranch $returnToBranch
-    "PR cleanup - Restored $returnToBranch branch"
+    Write-Progress "PR cleanup" "Restored $returnToBranch branch"
 
     # Safe branch deletion
-    "PR cleanup - Safe branch deletion"
+    Write-Progress "PR cleanup" "Safe branch deletion"
     foreach( $branch in $toDelete )
     {
         Remove-GitBranch $branch
-        "PR cleanup - Safe deleted '$branch'"
+        Write-Progress "PR cleanup" "Safe deleted '$branch'"
     }
 
     # Sometimes fzf messes up the console mode
