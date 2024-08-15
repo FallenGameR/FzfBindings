@@ -97,6 +97,7 @@ function Select-GitBranch( $name )
         return
     }
 
+    Write-Progress "Branch selection" "Checking out branch: $($selected.Branch)"
     $current = Resolve-GitBranch "HEAD"
     if( $selected.Branch -ne $current )
     {
@@ -347,43 +348,40 @@ function SCRIPT:Test-GitPointAtSameCommit( $first, $second )
 
 function SCRIPT:Update-GitCheckoutBranch( $name )
 {
+    Write-Debug "git checkout $name"
     git checkout $name *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git checkout $name'" }
 
     Update-GitLineEndingsMitigation
-    "> Git checkout $name - done"
 }
 
 function SCRIPT:Update-GitMerge( $name )
 {
+    Write-Debug "git merge $name -X theirs"
     git merge $name -X theirs *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git merge $name" }
 
-    "> Git merge $name - done"
 }
 
 function SCRIPT:Update-GitPull
 {
+    Write-Debug "git pull"
     git pull
     if( $LASTEXITCODE -notin @(0,128) ) { throw "Could not complete wihtout errors 'git pull" }
-
-    "> Git pull - done"
 }
 
 function SCRIPT:Update-GitPush( $spec )
 {
+    Write-Debug "git push origin $spec"
     git push origin $spec *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git push origin $spec" }
-
-    "> Git push $spec - done"
 }
 
 function SCRIPT:Update-GitReset( $name )
 {
+    Write-Debug "git reset --hard $name"
     git reset --hard $name *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git reset --hard $name" }
-
-    "> Git reset --hard $name - done"
 }
 
 function Update-GitLineEndingsMitigation
@@ -400,8 +398,8 @@ function Update-GitLineEndingsMitigation
         $path = Get-Item (Join-Path $root $path) -ea Ignore | % FullName
         if( $path )
         {
+            Write-Debug "git update-index --assume-unchanged $path"
             git update-index --assume-unchanged $path 2>$null
-            "> Git update-index --assume-unchanged $path - done"
         }
     }
 }
