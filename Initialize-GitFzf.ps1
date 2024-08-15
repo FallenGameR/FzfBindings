@@ -97,7 +97,7 @@ function Select-GitBranch( $name )
         return
     }
 
-    Write-Progress "Branch selection" "Checking out branch: $($selected.Branch)"
+    Write-Progress "Branch selection" "Checking out branch $($selected.Branch)"
     $current = Resolve-GitBranch "HEAD"
     if( $selected.Branch -ne $current )
     {
