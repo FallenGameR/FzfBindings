@@ -102,6 +102,7 @@ function Select-GitBranch( $name )
     if( $selected.Branch -ne $current )
     {
         Update-GitCheckoutBranch $selected.Branch
+        Assert-GitEmptyStatus
     }
     else
     {
@@ -210,7 +211,9 @@ function Clear-GitBranch( $name, [switch] $Force )
     Write-Progress "PR cleanup" "Updating master"
     Assert-GitCleanMaster
     Update-GitCheckoutBranch $master
+    Assert-GitEmptyStatus
     Update-GitPull
+    Assert-GitEmptyStatus
 
     # Clear the branches
     $toDelete = @()
@@ -361,7 +364,6 @@ function SCRIPT:Update-GitMerge( $name )
     Write-Debug "git merge $name -X theirs"
     git merge $name -X theirs *> $null
     if( $LASTEXITCODE ) { throw "Could not complete wihtout errors 'git merge $name" }
-
 }
 
 function SCRIPT:Update-GitPull
