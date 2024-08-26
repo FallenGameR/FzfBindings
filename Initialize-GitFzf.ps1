@@ -192,7 +192,8 @@ function Clear-GitBranch( $name, [switch] $Force )
 
     Write-Progress "PR cleanup" "Branch selection"
     if( -not $branches ) { return }
-    $selected = $branches | Select-GitBranchFzf Branch $name | select Branch, Freshness, Status
+    $selected = $branches | select Branch, Freshness, Status | Select-GitBranchFzf Branch $name | foreach Branch
+    $selected = @($branches | where{ $psitem.Branch -in $selected })
     if( -not $selected )
     {
         Repair-ConsoleMode
