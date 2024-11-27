@@ -22,46 +22,6 @@
 "`e[2S" + "test"            # viewport move
 ```
 
-## FZF bindings debug
-
-- fzf command, fail, repro
-    second tab with ntp initialized in the first tab
-    from ntp folder
-    cdf pfgold
-    work
-    pending
-    sd submit -c
-- inline - no repro yet, have repro
-    Select-GitBranch
-    Select-GitBranch
-- revert back completelly, fa53264ce57c6
-  - slowly add back, test each change for a day
-  - figure out a way how to merge two codebases
-  - what is the diff?
-    - change name and locations only
-    - do diff
-      - Initialize-Fzf.ps1 -> Initialize-ShellFzf.ps1
-      - Import-GitTools.ps1 -> Initialize-GitFzf.ps1
-      - Invoke-Cdf.ps1 -> Get-Folder.ps1
-      - Invoke-Codef.ps1 -> Get-FileEntry.ps1
-      - Preview-CodeF.ps1 -> Show-FileEntry.ps1
-      - Import-GitBranchPreview.ps1 -> Show-GitBranch.ps1
-- fast forward, but revert only functionality for cdf/go up
-  - repro seem to occur after changing folder only
-  - what about codef?
-  - old previews, new code didn't work
-  - trying out new previews, old code
-- repro on Clear-GitBranch
-
-## Future Improvements
-
-- pr selection pre-selects current branch
-- fzf shortcut to clean the input
-- Cleanup-GitBranch - merge may fail
-  - delete branch just after the successfull merge, otherwise another merge may affect it
-  - instruct merge to auto pick up theirs changes, there are trivial changes that don't need human interaction in this case
-- walker is needed check
-
 ## Notes from the doc
 
 ```ps1
