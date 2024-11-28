@@ -39,13 +39,21 @@ function Show-Help
 
 function Get-PreviewArgsFzf
 {
-    "--margin=1%",
+    # Compatiblity issue:
+    # VS code does not work with Alt+arrow
+    # Windows terminal doesn't work with Alt+Shift+arrow
+    $mod = if( (Get-Process -id $pid).Parent.Name -eq "Code" ) { "-shift" } else { "" }
+
     "--padding=1%",
-    "--border",
-    "--keep-right",
+    "--border=rounded",
     "--preview", "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}",
-    "--preview-window=55%,<50(down)",
+    "--preview-window=right,55%",
+    "--bind=alt-w:toggle-wrap",
     "--bind=alt-p:change-preview-window(down|right)",
+    "--bind=alt$mod-up:change-preview-window(down,65%|down,75%|down,85%|down,35%|down,45%|down,55%)",
+    "--bind=alt$mod-down:change-preview-window(down,45%|down,35%|down,85%|down,75%|down,65%|down,55%)",
+    "--bind=alt$mod-left:change-preview-window(right,65%|right,75%|right,85%|right,35%|right,45%|right,55%)",
+    "--bind=alt$mod-right:change-preview-window(right,45%|right,35%|right,85%|right,75%|right,65%|right,55%)",
     "--color=preview-bg:#222222"
 }
 
