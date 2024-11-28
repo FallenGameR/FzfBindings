@@ -487,6 +487,7 @@ function Search-RipgrepFzf
             --bind "change:reload: $rg ""{q}"" || cd ." `
             --bind "alt-f:unbind(change,alt-f)+change-prompt(rg|fzf> )+enable-search+clear-query+rebind(alt-r)" `
             --bind "alt-r:unbind(alt-r)+change-prompt(rg> )+disable-search+reload($rg ""{q}"" || cd .)+rebind(change,alt-f)" `
+            --bind "alt-p:change-preview-window(down|hidden|)" `
             --prompt "rg> " `
             --delimiter ":" `
             --tiebreak "begin,length" `
