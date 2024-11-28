@@ -473,6 +473,16 @@ function Search-RipgrepFzf
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
     $env:FZF_DEFAULT_COMMAND = "$rg ""$Query"""
 
+    <#
+    $env:RELOAD='reload:rg --column --color=always --smart-case {q} || exit 0'
+    fzf --disabled --ansi `
+    --bind "start:$env:RELOAD" --bind "change:$env:RELOAD"`
+    --delimiter ":" `
+    --preview 'bat --style=full --color=always --highlight-line {2} {1}' `
+    --preview-window '~4,+{2}+4/3,<80(up)' `
+    --bind 'ctrl-o:execute-silent:code {1}'
+    #>
+
     $result = try
     {
         # 'command || cd .' is used as analog of 'command || true' in linux samples
@@ -493,7 +503,7 @@ function Search-RipgrepFzf
             --tiebreak "begin,length" `
             --header '<ALT-R: rg> <ALT-F: fzf>' `
             --preview 'bat --color=always {1} --highlight-line {2}' `
-            --preview-window 'up,72%,border-bottom,+{2}/3,~3'
+            --preview-window 'up,border-bottom,+{2}/3,~3'
             # +{2} - place in bat output, base offset to use for scrolling bat output to the highlighted line, from {2} token
             # /3   - place in viewport to place the highlighted line, in fraction of the preview window height - near the middle of the screen but a bit higher
             # ,~3  - pin top 3 lines from the bat output as the header, it would show the name of the file
