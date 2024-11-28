@@ -20,6 +20,7 @@ function Show-Help
         [string] $Path
     )
 
+
     begin
     {
         if( $path )
@@ -73,8 +74,8 @@ function Show-PreviewFzf
         ls | % FullName | pf src
     #>
 
-    $fzfArgs = Get-FzfDefaultFilePreview
-    $input | fzf @fzfArgs
+    trap { Repair-ConsoleMode }
+    $input | fzf @(Get-FzfDefaultFilePreview)
 }
 
 function Start-ProcessFzf($path)
@@ -93,7 +94,10 @@ function Start-ProcessFzf($path)
         startf sln
     #>
 
+    trap { Repair-ConsoleMode }
+
     $fzfArgs = @()
+
     if( $path )
     {
         $fzfArgs += "-q"
