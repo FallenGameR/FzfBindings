@@ -37,32 +37,16 @@ function Show-Help
     }
 }
 
-function Get-PreviewArgsFzf( $path )
+function Get-PreviewArgsFzf
 {
-    $fzfArgs =
-        "--wrap",
-        "--margin", "1%",
-        "--padding", "1%",
-        "--border",
-        "--keep-right",
-        "--preview", "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}",
-        "--preview-window=55%,<50(down)",
-        "--bind=alt-p:change-preview-window(down|right)"
-
-    $executedFromCode = (gps -id $pid | % parent | % name) -eq "Code"
-    if( -not $executedFromCode )
-    {
-        # For some reason in VS code terminal background color remains
-        $fzfArgs += "--color", "preview-bg:#222222"
-    }
-
-    if( $path )
-    {
-        $fzfArgs += "-q"
-        $fzfArgs += $path
-    }
-
-    $fzfArgs
+    "--margin=1%",
+    "--padding=1%",
+    "--border",
+    "--keep-right",
+    "--preview", "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}",
+    "--preview-window=55%,<50(down)",
+    "--bind=alt-p:change-preview-window(down|right)",
+    "--color=preview-bg:#222222"
 }
 
 function Show-PreviewFzf
@@ -159,7 +143,13 @@ function Set-LocationFzf
 
     trap { Repair-ConsoleMode }
 
-    $fzfArgs = Get-PreviewArgsFzf $path
+    $fzfArgs = Get-PreviewArgsFzf
+
+    if( $path )
+    {
+        $fzfArgs += "-q"
+        $fzfArgs += $path
+    }
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
     $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-Folder.ps1"""
