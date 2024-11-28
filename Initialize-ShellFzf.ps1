@@ -2,7 +2,7 @@ function Show-Help
 {
     <#
     .SYNOPSIS
-        Show colorized via bat help for a native command
+        Show colorized via bat help for a native command (hlp)
 
     .PARAMETER Path
         Path to the native executable.
@@ -46,7 +46,8 @@ function Get-PreviewArgsFzf( $path )
         "--border",
         "--keep-right",
         "--preview", "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}",
-        "--preview-window=55%"
+        "--preview-window=55%,<50(down)",
+        "--bind=alt-p:change-preview-window(down|right)"
 
     $executedFromCode = (gps -id $pid | % parent | % name) -eq "Code"
     if( -not $executedFromCode )
@@ -68,7 +69,7 @@ function Show-PreviewFzf
 {
     <#
     .SYNOPSIS
-        Preview piped in files with fzf
+        Preview piped in files with fzf (pf)
 
     .DESCRIPTION
         This command will not pipe in input to fzf until all the input
