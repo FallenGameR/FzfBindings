@@ -474,13 +474,14 @@ function Search-RipgrepFzf
     $env:FZF_DEFAULT_COMMAND = "$rg ""$Query"""
 
     <#
-    $env:RELOAD='reload:rg --column --color=always --smart-case {q} || exit 0'
+    $env:RELOAD='reload:(rg --column --color=always --smart-case {q} || exit 0)'
     fzf --disabled --ansi `
-    --bind "start:$env:RELOAD" --bind "change:$env:RELOAD"`
-    --delimiter ":" `
-    --preview 'bat --style=full --color=always --highlight-line {2} {1}' `
-    --preview-window '~4,+{2}+4/3,<80(up)' `
-    --bind 'ctrl-o:execute-silent:code {1}'
+        --bind "start:$env:RELOAD" --bind "change:$env:RELOAD"`
+        --delimiter ":" `
+        --preview 'bat -n --color=always --highlight-line {2} {1} --terminal-width %FZF_PREVIEW_COLUMNS%' `
+        --bind "alt-p:change-preview-window(right|down)" `
+        --preview-window '~4,+{2}+4/3,down' `
+        --bind 'ctrl-o:execute-silent:code {1}'
     #>
 
     $result = try

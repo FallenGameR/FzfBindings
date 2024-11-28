@@ -87,7 +87,7 @@ fzf --disabled --ansi --bind "start:$env:RELOAD" --bind "change:$env:RELOAD" `
 # +4 — We add 4 lines to the base offset to compensate for the header
 # /3 adjusts the offset so that the matching line is shown at a 1/3 position in the window
 # if the width is narrower than 80 columns, it will open above the main window with 50% height !!!
-$env:RELOAD='reload:rg --column --color=always --smart-case {q} || exit 0'
+$env:RELOAD='reload:(rg --column --color=always --smart-case {q} || exit 0)'
 fzf --disabled --ansi `
     --bind "start:$env:RELOAD" --bind "change:$env:RELOAD"`
     --delimiter ":" `
