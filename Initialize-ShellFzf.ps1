@@ -37,7 +37,7 @@ function Show-Help
     }
 }
 
-function Get-PreviewArgsFzf
+function Get-FzfDefaultFilePreview
 {
     # Compatiblity issue:
     # VS code does not work with Alt+arrow
@@ -73,7 +73,7 @@ function Show-PreviewFzf
         ls | % FullName | pf src
     #>
 
-    $fzfArgs = Get-PreviewArgsFzf
+    $fzfArgs = Get-FzfDefaultFilePreview
     $input | fzf @fzfArgs
 }
 
@@ -151,7 +151,7 @@ function Set-LocationFzf
 
     trap { Repair-ConsoleMode }
 
-    $fzfArgs = Get-PreviewArgsFzf
+    $fzfArgs = Get-FzfDefaultFilePreview
 
     if( $path )
     {
@@ -352,7 +352,7 @@ function Invoke-CodeFzf
         # Select paths
         if( -not $paths )
         {
-            $fzfArgs = Get-PreviewArgsFzf
+            $fzfArgs = Get-FzfDefaultFilePreview
 
             $fzfPreserved = $env:FZF_DEFAULT_COMMAND
             $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""
