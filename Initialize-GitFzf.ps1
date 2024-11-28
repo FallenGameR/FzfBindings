@@ -275,6 +275,7 @@ function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
     $fzfArgs += "--header-lines=$header"    # Table header
     $fzfArgs += "--info=hidden"             # Finder info style
     $fzfArgs += "--multi"                   # Allow multi selection
+    $fzfArgs += "--wrap"                    # Wrap long entries
 
     # Pre view
     $fzfArgs += "--margin", "1%"            # To set some borders

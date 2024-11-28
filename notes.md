@@ -28,6 +28,7 @@
 # FZF docs https://junegunn.github.io/fzf/getting-started/
 git branch | fzf --preview 'git show --color=always {-1}' --bind 'enter:become(git checkout {-1})'
 
+# if FZF_DEFAULT_COMMAND is not set
 fzf --walker "file,dir,follow,hidden" --walker-skip ".git,node_modules,target,bin" --preview 'bat -n --color=always {}' --bind 'ctrl-y:change-preview-window(down|hidden|)' --header 'Press CTRL-Y to toggle preview'
 
 # To do that, you need to feed NUL-separated list to fzf and use --read0 option because a new line character can no longer be used to separate items.
@@ -40,6 +41,10 @@ tail -f test.txt | fzf --tail 10 --tac --no-sort --exact --wrap
 cat /dev/random | xxd | fzf --tail 1000 --tac --wrap
 
 fzf --header 'Loading ...' --header-lines 1 --layout reverse --bind 'start:reload:sleep 1; ps'  --bind 'load:change-header:'
+
+fd --type f |
+  fzf --header $'[Files] [Directories]' --header-first `
+      --bind 'click-header:transform:(( FZF_CLICK_HEADER_COLUMN <= 7 )) && echo "reload(fd --type f)" (( FZF_CLICK_HEADER_COLUMN >= 9 )) && echo "reload(fd --type d)"'
 
 stern . --color always 2>&1 |
     fzf --ansi --tail 100000 --tac --no-sort --exact --wrap \

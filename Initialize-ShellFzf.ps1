@@ -40,6 +40,7 @@ function Show-Help
 function Get-PreviewArgsFzf( $path )
 {
     $fzfArgs =
+        "--wrap",
         "--margin", "1%",
         "--padding", "1%",
         "--border",
