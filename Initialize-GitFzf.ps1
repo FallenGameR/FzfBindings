@@ -76,11 +76,7 @@ function Get-GitPrBranch
 
 function Select-GitBranch( $name )
 {
-    trap
-    {
-        Repair-ConsoleMode
-        Write-Progress "Branch selection" -Completed
-    }
+    trap { Write-Progress "Branch selection" -Completed }
 
     Write-Progress "Branch selection" "Check git status"
     Assert-GitEmptyStatus
@@ -90,12 +86,7 @@ function Select-GitBranch( $name )
     if( -not $branches ) { return }
 
     $selected = $branches | Select-FzfGitBranch Branch $name | select -f 1
-    if( -not $selected )
-    {
-        # Sometimes fzf messes up the console mode
-        Repair-ConsoleMode
-        return
-    }
+    if( -not $selected ) { return }
 
     Write-Progress "Branch selection" "Checking out branch $($selected.Branch)"
     $current = Resolve-GitBranch "HEAD"
@@ -108,9 +99,6 @@ function Select-GitBranch( $name )
     {
         "Already on branch $current"
     }
-
-    # Sometimes fzf messes up the console mode
-    Repair-ConsoleMode
 }
 
 function Send-GitBranch( $name, [switch] $Force )
@@ -195,11 +183,7 @@ function Clear-GitBranch( $name, [switch] $Force )
     if( -not $branches ) { return }
     $selected = $branches | select Branch, Freshness, Status | Select-FzfGitBranch Branch $name | foreach Branch
     $selected = @($branches | where{ $psitem.Branch -in $selected })
-    if( -not $selected )
-    {
-        Repair-ConsoleMode
-        return
-    }
+    if( -not $selected ) { return }
 
     Write-Progress "PR cleanup" "Branch verification"
     $sent = @($selected | foreach Branch)
@@ -260,11 +244,7 @@ function Clear-GitBranch( $name, [switch] $Force )
         Remove-GitBranch $branch
         Write-Progress "PR cleanup" "Safe deleted '$branch'"
     }
-
-    # Sometimes fzf messes up the console mode
-    Repair-ConsoleMode
 }
-
 
 function SCRIPT:Select-FzfGitBranch( $key, $fzfFilter )
 {
