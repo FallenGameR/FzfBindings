@@ -1,12 +1,15 @@
-function Show-Help
+function Show-BatHelp
 {
     <#
     .SYNOPSIS
         Show colorized via bat help for a native command (hlp)
 
     .PARAMETER Path
-        Path to the native executable.
-        Or you can pipe in the help text to render.
+        (Optional) Path to the native executable. In this mode --help will be
+        called and STDOUT and STDERR will be merged.
+
+    .PARAMETER InputObject
+        (Optional) Help text to render. In this mode just pipe in the help text.
 
     .EXAMPLE
         hlp ping
@@ -25,7 +28,7 @@ function Show-Help
         # First mode - try to call --help for a native command that usually uses STDERR for output
         if( $path )
         {
-            & $path --help 2>&1 | Show-Help
+            & $path --help 2>&1 | Show-BatHelp
             return
         }
 
@@ -42,7 +45,7 @@ function Show-Help
     }
 }
 
-function Get-FzfDefaultFilePreview
+function Get-FzfFilePreviewArgs
 {
     # Compatiblity with different terminals:
     # - VS code does not work with Alt+arrow
@@ -62,31 +65,32 @@ function Get-FzfDefaultFilePreview
     "--color=preview-bg:#222222"
 }
 
-function Show-PreviewFzf
+function Show-FzfFilePreview
 {
     <#
     .SYNOPSIS
         Preview piped in files with fzf (pf)
 
     .DESCRIPTION
-        This command will not pipe in input to fzf until all the input
-        will be collected. That is important on huge inputs. If you want
-        async fast output call fzf directly (but no preview) or combine
-        it with walker (as it is done in cdf and CodeF).
+        This command will not pipe the input to the fzf until all
+        the input would be collected. That is important for huge inputs.
+
+        If you want async fast output your would need to fzf directly
+        and maybe to combine it with walker as it is done in cdf and CodeF.
 
     .EXAMPLE
-        ls | % FullName | pf src
+        ls | % FullName | pf
     #>
 
     trap { Repair-ConsoleMode }
-    $input | fzf @(Get-FzfDefaultFilePreview)
+    $input | fzf @(Get-FzfFilePreviewArgs)
 }
 
-function Start-ProcessFzf($path)
+function Start-FzfProcess
 {
     <#
     .SYNOPSIS
-        Find app with fzf and execute it via shell
+        Find an app via the fzf and execute it via the shell
 
     .PARAMETER Path
         Part of the path to the started executable somewhere
@@ -98,14 +102,18 @@ function Start-ProcessFzf($path)
         startf sln
     #>
 
+    param
+    (
+        [string] $Path
+    )
+
     trap { Repair-ConsoleMode }
 
     $fzfArgs = @()
-
-    if( $path )
+    if( $Path )
     {
         $fzfArgs += "-q"
-        $fzfArgs += $path
+        $fzfArgs += $Path
     }
 
     $destination = fzf @fzfArgs
@@ -113,20 +121,19 @@ function Start-ProcessFzf($path)
 
     if( $destination )
     {
+        # Shell start is different on Unix and Windows
         if( $PSVersionTable.Platform -eq "Unix" )
         {
-            # Unix
             & $destination
         }
         else
         {
-            # Windows
             start $destination
         }
     }
 }
 
-function Set-LocationFzf
+function Set-FzfLocation
 {
     <#
     .SYNOPSIS
@@ -159,7 +166,7 @@ function Set-LocationFzf
 
     trap { Repair-ConsoleMode }
 
-    $fzfArgs = Get-FzfDefaultFilePreview
+    $fzfArgs = Get-FzfFilePreviewArgs
 
     if( $path )
     {
@@ -360,7 +367,7 @@ function Invoke-CodeFzf
         # Select paths
         if( -not $paths )
         {
-            $fzfArgs = Get-FzfDefaultFilePreview
+            $fzfArgs = Get-FzfFilePreviewArgs
 
             $fzfPreserved = $env:FZF_DEFAULT_COMMAND
             $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""

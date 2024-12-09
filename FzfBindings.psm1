@@ -37,15 +37,15 @@ if( $PSVersionTable.Platform -ne "Unix" ) { $SCRIPT:pwsh += ".exe" }
 . "$PSScriptRoot\Initialize-GitFzf.ps1"
 
 # Set up aliases
-Set-Alias cdf Set-LocationFzf
+Set-Alias cdf Set-FzfLocation
 Set-Alias clrf Clear-GitBranch
 Set-Alias codef Invoke-CodeFzf
 Set-Alias cof Select-GitBranch
 Set-Alias hf Invoke-HistoryFzf
-Set-Alias hlp Show-Help
+Set-Alias hlp Show-BatHelp
 Set-Alias killf Stop-ProcessFzf
-Set-Alias pf Show-PreviewFzf
+Set-Alias pf Show-FzfFilePreview
 Set-Alias prf Send-GitBranch
 Set-Alias pushf Push-LocationFzf
 Set-Alias rgf Search-RipgrepFzf
-Set-Alias startf Start-ProcessFzf
+Set-Alias startf Start-FzfProcess
