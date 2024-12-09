@@ -39,13 +39,13 @@ if( $PSVersionTable.Platform -ne "Unix" ) { $SCRIPT:pwsh += ".exe" }
 # Set up aliases
 Set-Alias cdf Set-FzfLocation
 Set-Alias clrf Clear-GitBranch
-Set-Alias codef Invoke-CodeFzf
+Set-Alias codef Invoke-FzfCode
 Set-Alias cof Select-GitBranch
-Set-Alias hf Invoke-HistoryFzf
+Set-Alias hf Invoke-FzfHistory
 Set-Alias hlp Show-BatHelp
-Set-Alias killf Stop-ProcessFzf
+Set-Alias killf Stop-FzfProcess
 Set-Alias pf Show-FzfFilePreview
 Set-Alias prf Send-GitBranch
-Set-Alias pushf Push-LocationFzf
-Set-Alias rgf Search-RipgrepFzf
+Set-Alias pushf Push-FzfLocation
+Set-Alias rgf Search-FzfRipgrep
 Set-Alias startf Start-FzfProcess

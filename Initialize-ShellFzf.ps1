@@ -184,7 +184,7 @@ function Set-FzfLocation
     }
 }
 
-function Stop-ProcessFzf
+function Stop-FzfProcess
 {
     <#
     .SYNOPSIS
@@ -203,8 +203,6 @@ function Stop-ProcessFzf
         [string] $Name
     )
 
-    trap { Repair-ConsoleMode }
-
     $fzfArgs = @()
     $fzfArgs += "--header-lines=3"  # PS output table header
     $fzfArgs += "--height"          # To see few lines of previous input in case we want to kill pwsh
@@ -216,19 +214,17 @@ function Stop-ProcessFzf
         $fzfArgs += $name
     }
 
-    $lines = gps | fzf @fzfArgs
-    if( -not $lines ) {return}
+    $lines = try{ gps | fzf @fzfArgs } finally { Repair-ConsoleMode }
+    if( -not $lines ) { return }
 
     $lines | foreach{
         $split = $psitem -split "\s+" | where{ $psitem }
         $id = $split[4]
         Stop-Process -Id $id -Verbose -ea Ignore
     }
-
-    Repair-ConsoleMode
 }
 
-function Push-LocationFzf
+function Push-FzfLocation
 {
     <#
     .SYNOPSIS
@@ -270,14 +266,14 @@ function Push-LocationFzf
         }
     }
 
-    $path = Get-DirectoryStack | Sort-Object -desc | pf
+    $path = Get-DirectoryStack | Sort-Object -desc | Show-FzfFilePreview
     if( $path )
     {
         pushd $path
     }
 }
 
-function Invoke-HistoryFzf
+function Invoke-FzfHistory
 {
     <#
     .SYNOPSIS
@@ -298,7 +294,7 @@ function Invoke-HistoryFzf
 
     # Select commands to execute with fzf
     $text = ($commands | Out-String) -split [Environment]::NewLine | select -Skip 3
-    $result = $text | fzf
+    $result = try{ $text | fzf } finally { Repair-ConsoleMode }
 
     if( $result )
     {
@@ -314,7 +310,7 @@ function Invoke-HistoryFzf
     Repair-ConsoleMode
 }
 
-function Invoke-CodeFzf
+function Invoke-FzfCode
 {
     <#
     .SYNOPSIS
@@ -351,21 +347,14 @@ function Invoke-CodeFzf
     }
     end
     {
-        trap { Repair-ConsoleMode }
-
         # Select paths
         if( -not $paths )
         {
             $fzfArgs = Get-FzfFilePreviewArgs
-
             $fzfPreserved = $env:FZF_DEFAULT_COMMAND
             $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""
             try { $paths = @(fzf @fzfArgs) }
-            finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
-
-            # This is a slower way to do the same. But there is a related walker/pwsh/FZF bug
-            # that can be mitigated this way. But recently I found a workaround for that bug.
-            #$paths = @(& "$PSScriptRoot/Walk/Get-FileEntry.ps1" | fzf @fzfArgs)
+            finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved; Repair-ConsoleMode }
         }
 
         if( -not $paths )
@@ -380,12 +369,10 @@ function Invoke-CodeFzf
             $invoke
             code --goto $path
         }
-
-        Repair-ConsoleMode
     }
 }
 
-function Search-RipgrepFzf
+function Search-FzfRipgrep
 {
     <#
     .SYNOPSIS
