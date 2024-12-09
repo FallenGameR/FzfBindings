@@ -47,6 +47,7 @@
 
     # Functions to export from this module
     FunctionsToExport = @(
+        "Initialize-FzfArgs",
         "Clear-GitBranch",
         "Get-GitBranch",
         "Get-GitPrBranch",

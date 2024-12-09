@@ -89,7 +89,7 @@ function Select-GitBranch( $name )
     $branches = Get-GitPrBranch | select Branch, Freshness, Status
     if( -not $branches ) { return }
 
-    $selected = $branches | Select-GitBranchFzf Branch $name | select -f 1
+    $selected = $branches | Select-FzfGitBranch Branch $name | select -f 1
     if( -not $selected )
     {
         # Sometimes fzf messes up the console mode
@@ -130,7 +130,7 @@ function Send-GitBranch( $name, [switch] $Force )
 
     Write-Progress "PR creation" "Branch selection"
     if( -not $branches ) { return }
-    $selected = $branches | Select-GitBranchFzf Branch $name
+    $selected = $branches | Select-FzfGitBranch Branch $name
     if( -not $selected ) { return }
 
     Write-Progress "PR creation" "Branch verification"
@@ -193,7 +193,7 @@ function Clear-GitBranch( $name, [switch] $Force )
 
     Write-Progress "PR cleanup" "Branch selection"
     if( -not $branches ) { return }
-    $selected = $branches | select Branch, Freshness, Status | Select-GitBranchFzf Branch $name | foreach Branch
+    $selected = $branches | select Branch, Freshness, Status | Select-FzfGitBranch Branch $name | foreach Branch
     $selected = @($branches | where{ $psitem.Branch -in $selected })
     if( -not $selected )
     {
@@ -265,35 +265,16 @@ function Clear-GitBranch( $name, [switch] $Force )
     Repair-ConsoleMode
 }
 
-function SCRIPT:Select-GitBranchFzf( $key, $fzfFilter, $header = 2 )
+
+function SCRIPT:Select-FzfGitBranch( $key, $fzfFilter )
 {
     # NOTE: it looks like this call ocasionally messes up the CR symbols in the terminal
     # is caused by preview? There is no FZF_COMMAND replacement here.
-    $fzfArgs = @()
-
-    # Main view, in adding to default args
-    $fzfArgs += "--header-lines=$header"    # Table header
-    $fzfArgs += "--info=hidden"             # Finder info style
-    $fzfArgs += "--multi"                   # Allow multi selection
-    $fzfArgs += "--wrap"                    # Wrap long entries
-
-    # Pre view
-    $fzfArgs += "--margin", "1%"            # To set some borders
-    $fzfArgs += "--padding", "1%"           # To set some borders
-    $fzfArgs += "--border"                  # To set some borders
-    $fzfArgs += "--keep-right"              # Preview to the right
-    $fzfArgs += "--preview", "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-GitBranch.ps1"" {}"
-    $fzfArgs += "--preview-window=60%"      # Preview size
-
-    # fzf filter
-    if( $fzfFilter )
-    {
-        $fzfArgs += "-q", $fzfFilter        # Pre-populate fzf filter
-    }
+    $fzfArgs = @(Initialize-FzfArgs $fzfFilter -BranchPreview)
 
     # Query via fzf and reconstruct as objects
     $objects = @($input)
-    $selected = @($objects | ft -auto | Out-String | % trim | fzf @fzfArgs)
+    $selected = try{ @($objects | ft -auto | Out-String | % trim | fzf @fzfArgs) } finally { Repair-ConsoleMode }
     $selected |
         where{ $psitem -match "^(\S+)"} |
         foreach{ $matches[1]} |

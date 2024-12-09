@@ -1,3 +1,52 @@
+function Initialize-FzfArgs
+{
+    param
+    (
+        [string] $Query,
+        [switch] $FilePreview,
+        [switch] $BranchPreview
+    )
+
+    # Optional pre-populated fzf query string
+    if( $Query )
+    {
+        "--query"
+        $Query
+    }
+
+    # Preview engine
+    if( $FilePreview )
+    {
+        "--preview"
+        "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}"
+    }
+
+    if( $BranchPreview )
+    {
+        # Branch previews have powershell table with header on input
+        "--header-lines=2"
+        "--preview"
+        "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-GitBranch.ps1"" {}"
+    }
+
+    # Preview defaults
+    "--preview-window=right,55%"
+    "--color=preview-bg:#222222"
+    "--padding=1%"
+    "--border=rounded"
+    "--bind=alt-w:toggle-wrap"
+
+    # Preview size changes need to be compatible with different terminals:
+    # - VS code does not work with Alt+arrow
+    # - Windows terminal doesn't work with Alt+Shift+arrow
+    $mod = if( (Get-Process -id $pid).Parent.Name -eq "Code" ) { "-shift" } else { "" }
+    "--bind=alt-p:change-preview-window(down|right)"
+    "--bind=alt$mod-up:change-preview-window(down,65%|down,75%|down,85%|down,35%|down,45%|down,55%)"
+    "--bind=alt$mod-down:change-preview-window(down,45%|down,35%|down,85%|down,75%|down,65%|down,55%)"
+    "--bind=alt$mod-left:change-preview-window(right,65%|right,75%|right,85%|right,35%|right,45%|right,55%)"
+    "--bind=alt$mod-right:change-preview-window(right,45%|right,35%|right,85%|right,75%|right,65%|right,55%)"
+}
+
 function Show-BatHelp
 {
     <#
@@ -45,26 +94,6 @@ function Show-BatHelp
     }
 }
 
-function Get-FzfFilePreviewArgs
-{
-    # Compatiblity with different terminals:
-    # - VS code does not work with Alt+arrow
-    # - Windows terminal doesn't work with Alt+Shift+arrow
-    $mod = if( (Get-Process -id $pid).Parent.Name -eq "Code" ) { "-shift" } else { "" }
-
-    "--padding=1%",
-    "--border=rounded",
-    "--preview", "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}",
-    "--preview-window=right,55%",
-    "--bind=alt-w:toggle-wrap",
-    "--bind=alt-p:change-preview-window(down|right)",
-    "--bind=alt$mod-up:change-preview-window(down,65%|down,75%|down,85%|down,35%|down,45%|down,55%)",
-    "--bind=alt$mod-down:change-preview-window(down,45%|down,35%|down,85%|down,75%|down,65%|down,55%)",
-    "--bind=alt$mod-left:change-preview-window(right,65%|right,75%|right,85%|right,35%|right,45%|right,55%)",
-    "--bind=alt$mod-right:change-preview-window(right,45%|right,35%|right,85%|right,75%|right,65%|right,55%)",
-    "--color=preview-bg:#222222"
-}
-
 function Show-FzfFilePreview
 {
     <#
@@ -82,7 +111,7 @@ function Show-FzfFilePreview
         ls | % FullName | pf
     #>
 
-    try{ $input | fzf @(Get-FzfFilePreviewArgs) }
+    try{ $input | fzf @(Initialize-FzfArgs -FilePreview) }
     finally{ Repair-ConsoleMode }
 }
 
@@ -162,13 +191,7 @@ function Set-FzfLocation
         [switch] $NoIgnore
     )
 
-    $fzfArgs = Get-FzfFilePreviewArgs
-
-    if( $path )
-    {
-        $fzfArgs += "-q"
-        $fzfArgs += $path
-    }
+    $fzfArgs = Initialize-FzfArgs $path -FilePreview
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
     $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-Folder.ps1"""
@@ -350,7 +373,7 @@ function Invoke-FzfCode
         # Select paths
         if( -not $paths )
         {
-            $fzfArgs = Get-FzfFilePreviewArgs
+            $fzfArgs = Initialize-FzfArgs -FilePreview
             $fzfPreserved = $env:FZF_DEFAULT_COMMAND
             $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""
             try { $paths = @(fzf @fzfArgs) }
