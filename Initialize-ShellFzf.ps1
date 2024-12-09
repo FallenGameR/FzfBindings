@@ -20,29 +20,33 @@ function Show-Help
         [string] $Path
     )
 
-
     begin
     {
+        # First mode - try to call --help for a native command that usually uses STDERR for output
         if( $path )
         {
             & $path --help 2>&1 | Show-Help
             return
         }
+
+        # Second mode - treat any input as help text
         $accumulator = @()
     }
-    process { $accumulator += $psitem }
+    process
+    {
+        $accumulator += $psitem
+    }
     end
     {
-        # NOTE: On Unix it may be 'man'
         $accumulator | bat -pl help
     }
 }
 
 function Get-FzfDefaultFilePreview
 {
-    # Compatiblity issue:
-    # VS code does not work with Alt+arrow
-    # Windows terminal doesn't work with Alt+Shift+arrow
+    # Compatiblity with different terminals:
+    # - VS code does not work with Alt+arrow
+    # - Windows terminal doesn't work with Alt+Shift+arrow
     $mod = if( (Get-Process -id $pid).Parent.Name -eq "Code" ) { "-shift" } else { "" }
 
     "--padding=1%",
