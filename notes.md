@@ -1,6 +1,9 @@
 # FZF Notes
 
-- [help](https://junegunn.github.io/fzf/getting-started/)
+- [Help](https://junegunn.github.io/fzf/getting-started/)
+- [Events](https://junegunn.github.io/fzf/reference/#available-events)
+- [Keys](https://junegunn.github.io/fzf/reference/#available-keys)
+- [Actions](https://junegunn.github.io/fzf/reference/#available-actions)
 
 ## fzf issues
 
@@ -24,16 +27,15 @@
 
 ```ps1
 
-# To do that, you need to feed NUL-separated list to fzf and use --read0 option because a new line character can no longer be used to separate items.
+# Multiline input is possible - you need to have NUL-separated list on input and add --read0 option
 rg --pretty test | perl -0777 -pe 's/\n\n/\n\0/gm' | fzf --read0 
 
+# Tail is supported, but this needs to be tried out
 .\W32TimeLogParser.exe -f -i C:\Windows\w32time.log | fzf --tail 100000 --tac --no-sort --exact
-tail -f test.txt | fzf --tail 10 --tac --no-sort --exact --wrap
+tail -f test.txt                                    | fzf --tail 10     --tac --no-sort --exact --wrap
+cat /dev/random | xxd                               | fzf --tail 1000   --tac                   --wrap
 
-# add --wrap parameter to FzfBindings
-cat /dev/random | xxd | fzf --tail 1000 --tac --wrap
-
-fzf --header 'Loading ...' --header-lines 1 --layout reverse --bind 'start:reload:sleep 1; ps'  --bind 'load:change-header:'
+fzf --header 'Loading ...' --header-lines 1 --layout reverse --bind 'start:reload:ping localhost'  --bind 'load:change-header:'
 
 fd --type f |
   fzf --header $'[Files] [Directories]' --header-first `
