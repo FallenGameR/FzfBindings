@@ -82,8 +82,8 @@ function Show-FzfFilePreview
         ls | % FullName | pf
     #>
 
-    trap { Repair-ConsoleMode }
-    $input | fzf @(Get-FzfFilePreviewArgs)
+    try{ $input | fzf @(Get-FzfFilePreviewArgs) }
+    finally{ Repair-ConsoleMode }
 }
 
 function Start-FzfProcess
@@ -107,8 +107,6 @@ function Start-FzfProcess
         [string] $Path
     )
 
-    trap { Repair-ConsoleMode }
-
     $fzfArgs = @()
     if( $Path )
     {
@@ -116,7 +114,7 @@ function Start-FzfProcess
         $fzfArgs += $Path
     }
 
-    $destination = fzf @fzfArgs
+    $destination = try{ fzf @fzfArgs } finally { Repair-ConsoleMode }
     $destination
 
     if( $destination )
@@ -164,8 +162,6 @@ function Set-FzfLocation
         [switch] $NoIgnore
     )
 
-    trap { Repair-ConsoleMode }
-
     $fzfArgs = Get-FzfFilePreviewArgs
 
     if( $path )
@@ -179,20 +175,13 @@ function Set-FzfLocation
     if( $Hidden ) { $env:FZF_DEFAULT_COMMAND += " -Hidden" }
     if( $NoIgnore ) { $env:FZF_DEFAULT_COMMAND += " -NoIgnore" }
     try { $destination = @(fzf @fzfArgs) }
-    finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved }
-
-    # This is a slower way to do the same. But there is a related walker/pwsh/FZF bug
-    # that can be mitigated this way. But recently I found a workaround for that bug.
-    #$destination = @(& "$PSScriptRoot/Walk/Get-Folder.ps1" | fzf @fzfArgs)
-
+    finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved; Repair-ConsoleMode }
     $destination
 
     if( $destination.Length -eq 1 )
     {
         cd $destination[0]
     }
-
-    Repair-ConsoleMode
 }
 
 function Stop-ProcessFzf
