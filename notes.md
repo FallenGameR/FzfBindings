@@ -1,5 +1,7 @@
 # FZF Notes
 
+- [help](https://junegunn.github.io/fzf/getting-started/)
+
 ## fzf issues
 
 - bug in cyrillic typing <https://github.com/junegunn/fzf/issues/2921>
@@ -7,10 +9,6 @@
 - bug in cyrillic FZF_DEFAULT_COMMAND <https://github.com/junegunn/fzf/issues/2923>
 - bug in passing escaped query to rg <https://github.com/junegunn/fzf/issues/2947>
 - fzf can't exit until piped input will be handled (by design)
-
-## fzf unused features
-
-- it can use SHELL env variable to call different commands using -command switch for pwsh
 
 ## ANSI escape sequences test
 
@@ -22,14 +20,9 @@
 "`e[2S" + "test"            # viewport move
 ```
 
-## Notes from the doc
+## Notes from the help doc
 
 ```ps1
-# FZF docs https://junegunn.github.io/fzf/getting-started/
-git branch | fzf --preview 'git show --color=always {-1}' --bind 'enter:become(git checkout {-1})'
-
-# if FZF_DEFAULT_COMMAND is not set
-fzf --walker "file,dir,follow,hidden" --walker-skip ".git,node_modules,target,bin" --preview 'bat -n --color=always {}' --bind 'ctrl-y:change-preview-window(down|hidden|)' --header 'Press CTRL-Y to toggle preview'
 
 # To do that, you need to feed NUL-separated list to fzf and use --read0 option because a new line character can no longer be used to separate items.
 rg --pretty test | perl -0777 -pe 's/\n\n/\n\0/gm' | fzf --read0 
