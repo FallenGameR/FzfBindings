@@ -262,16 +262,12 @@ function Invoke-FzfCode
         # Select paths
         if( -not $paths )
         {
-            $fzfArgs = Initialize-FzfArgs -FilePreview
-            $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-            $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""
-            try { $paths = @(fzf @fzfArgs) }
-            finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved; Repair-ConsoleMode }
-        }
+            $walker = "$PSScriptRoot/Walk/Get-FileEntry.ps1"
+            $command = "reload:pwsh -nop -f ""$walker"""
 
-        if( -not $paths )
-        {
-            return
+            $fzfArgs = Initialize-FzfArgs -FilePreview
+            $fzfArgs += "--bind", "start:$command"
+            $paths = @(try { fzf @fzfArgs } finally { Repair-ConsoleMode })
         }
 
         # Invoke code
@@ -374,17 +370,6 @@ function Search-FzfRipgrep
 
     $fzfPreserved = $env:FZF_DEFAULT_COMMAND
     $env:FZF_DEFAULT_COMMAND = "$rg ""$Query"""
-
-    <#
-    $env:RELOAD='reload:(rg --column --color=always --smart-case {q} || exit 0)'
-    fzf --disabled --ansi `
-        --bind "start:$env:RELOAD" --bind "change:$env:RELOAD"`
-        --delimiter ":" `
-        --preview 'bat -n --color=always --highlight-line {2} {1} --terminal-width %FZF_PREVIEW_COLUMNS%' `
-        --bind "alt-p:change-preview-window(right|down)" `
-        --preview-window '~4,+{2}+4/3,down' `
-        --bind 'ctrl-o:execute-silent:code {1}'
-    #>
 
     $result = try
     {
