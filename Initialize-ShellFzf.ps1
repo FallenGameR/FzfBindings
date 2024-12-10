@@ -40,13 +40,7 @@ function Start-FzfProcess
         [string] $Path
     )
 
-    $fzfArgs = @()
-    if( $Path )
-    {
-        $fzfArgs += "-q"
-        $fzfArgs += $Path
-    }
-
+    $fzfArgs = Initialize-FzfArgs $Path
     $destination = try{ fzf @fzfArgs } finally { Repair-ConsoleMode }
     $destination
 
