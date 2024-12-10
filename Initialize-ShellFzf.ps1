@@ -130,7 +130,7 @@ function Stop-FzfProcess
     )
 
     $fzfArgs = Initialize-FzfArgs $Name -ProcessPreview
-    $fzfArgs += "--height=90%"      # See few lines of previous input, in case we want to kill pwsh itself
+    $fzfArgs += "--height=90%" # See a few lines of PS console in case we just dumped $pid to kill it
 
     $lines = try{ gps | Out-Table | fzf @fzfArgs } finally { Repair-ConsoleMode }
     $lines | foreach{ Stop-Process -Id (-split $psitem)[4] -Verbose -ea Ignore }

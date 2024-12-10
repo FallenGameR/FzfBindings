@@ -6,10 +6,13 @@ if( -not $process ) { return }
 
 function SCRIPT:e { "`e[" + ($args -join ";") + "m" }
 
-if( $process.Description )
+$renderedName = if( $process.Description ) { $process.Description } else { $process.Name }
+"$(e 36)$renderedName$(e 0) (" + $Id + ")"
+""
+
+if( $process.Parent )
 {
-    "$(e 36)$($process.Description)$(e 0)"
-    ""
+    "$(e 32)Parent:$(e 0) " + $process.Parent.Name + " (" + $process.Parent.Id + ")"
 }
 
 if( $process.FileVersion )
@@ -20,11 +23,6 @@ if( $process.FileVersion )
 if( $process.ProductVersion -ne $process.FileVersion )
 {
     "$(e 32)ProductVersion:$(e 0) " + $process.ProductVersion
-}
-
-if( $process.Parent )
-{
-    "$(e 32)Parent:$(e 0) " + $process.Parent.Name + " (" + $process.Parent.Id + ")"
 }
 
 ""
