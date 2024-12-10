@@ -1,4 +1,11 @@
-# FZF Notes
+# Notes
+
+## ANSI Escape Codes
+
+- [ANSI Escape Sequences](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797)
+- [Using ANSI Escape Sequences in PowerShell](https://duffney.io/usingansiescapesequencespowershell/)
+
+## FZF Help
 
 - [Help](https://junegunn.github.io/fzf/getting-started/)
 - [Events](https://junegunn.github.io/fzf/reference/#available-events)

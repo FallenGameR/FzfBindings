@@ -1,8 +1,6 @@
 if( $args[0] -match "^(\S+)" ) { $branch = $matches[1] }
 if( -not $branch ) { return }
 
-# https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
-# https://duffney.io/usingansiescapesequencespowershell/
 function SCRIPT:e { "`e[" + ($args -join ";") + "m" }
 
 # Init

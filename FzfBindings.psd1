@@ -76,6 +76,7 @@
         ".\FzfBindings.psm1",
         ".\Initialize-GitFzf.ps1",
         ".\Initialize-ShellFzf.ps1",
+        ".\Utils.ps1",
         ".\notes.md",
         ".\readme.md",
         ".\Bin\.gitignore",
