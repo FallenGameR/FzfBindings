@@ -28,51 +28,30 @@
 ```ps1
 
 # Multiline input is possible - you need to have NUL-separated list on input and add --read0 option
-rg --pretty test | perl -0777 -pe 's/\n\n/\n\0/gm' | fzf --read0 
+rg --pretty test | perl -0 -pe 's/\n\n/\n\0/gm' | fzf --read0 
 
 # Tail is supported, but this needs to be tried out
 .\W32TimeLogParser.exe -f -i C:\Windows\w32time.log | fzf --tail 100000 --tac --no-sort --exact
 tail -f test.txt                                    | fzf --tail 10     --tac --no-sort --exact --wrap
 cat /dev/random | xxd                               | fzf --tail 1000   --tac                   --wrap
 
-fzf --header 'Loading ...' --header-lines 1 --layout reverse --bind 'start:reload:ping localhost'  --bind 'load:change-header:'
+# Shell can be changed, but pwsh doesn't fix the cyrilic issue and is slow. Win default is "cmd /s/c"
+# --with-shell "pwsh -nop -nologo -c"
 
-fd --type f |
-  fzf --header $'[Files] [Directories]' --header-first `
-      --bind 'click-header:transform:(( FZF_CLICK_HEADER_COLUMN <= 7 )) && echo "reload(fd --type f)" (( FZF_CLICK_HEADER_COLUMN >= 9 )) && echo "reload(fd --type d)"'
+# Binding 1-1
 
-stern . --color always 2>&1 |
-    fzf --ansi --tail 100000 --tac --no-sort --exact --wrap \
-        --bind 'ctrl-o:execute:vim -n <(kubectl logs {1})' \
-        --bind 'enter:execute:kubectl exec -it {1} -- bash' \
-        --header '╱ Enter (kubectl exec) ╱ CTRL-O (open log in vim) ╱'
-
-# Ripgrep: multi-line chunks #
-rg --pretty bash |
-  perl -0 -pe 's/\n\n/\n\0/gm' |
-  fzf --read0 --ansi --multi --highlight-line --layout reverse |
-  perl -ne '/^([0-9]+:|$)/ or print'        
-
-# Ripgrep: path on a separate line #
-rg --column --line-number --no-heading --color=always --smart-case -- bash |
-  perl -pe 's/\n/\n\0/; s/^([^:]+:){3}/$&\n  /' |
-  fzf --read0 --ansi --highlight-line --multi --delimiter : `
-      --preview 'bat --style=numbers --color=always --highlight-line {2} {1}' `
-      --preview-window '+{2}/4' |
-  perl -ne '/^([^:]+:){3}/ and print'  
-
-# just selector
+## just selector
 fzf --disabled
 
-# change on type {q} is the query
+## change on type {q} is the query
 fzf --disabled --bind 'change:reload:echo you typed {q}'
 fzf --disabled --bind 'change:reload:rg {q}'
+rg --column --color=always --smart-case '' | fzf --disabled --ansi --bind ('change:reload:' + 
+'rg --column --color=always --smart-case {q}')
 
-rg --column --color=always --smart-case '' |
-  fzf --disabled --ansi --bind 'change:reload:rg --column --color=always --smart-case {q}'
-
-# delimeter in the selected line {1} would be name, {2} would be line number
-# +{2} is offset to the second token, /2 show it in the middle of the screen
+## || exit 0 to handle errors from rg
+## delimeter split the fzf-selected line, {1} would be file name name, {2} would be line number
+## +{2} is offset to the second token (line number), /2 show it in the middle of the screen
 $env:RELOAD='reload:rg --column --color=always --smart-case {q} || exit 0'
 fzf --disabled --ansi --bind "start:$env:RELOAD" --bind "change:$env:RELOAD" `
      --delimiter ":" --preview 'bat --style=numbers --color=always --highlight-line {2} {1}' `
@@ -94,14 +73,6 @@ fzf --disabled --ansi `
 #     --bind 'ctrl-o:execute:code {1}:{2}' \ opens in new windows
 
 # We use {2..} instead of {2} in case the directory name contains spaces.
-
-# --with-shell=STR #
-# On Windows, the default value is cmd /s/c when $SHELL is not set.
-
-# actions with default bindings
-# backward-kill-word	alt-bs
-# backward-word	alt-b shift-left
-# beginning-of-line	ctrl-ahome
 
 # Multiple actions can be chained using + separator.
 fzf --multi --bind 'ctrl-a:select-all+accept'
