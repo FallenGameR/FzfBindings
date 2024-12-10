@@ -191,19 +191,24 @@ function Set-FzfLocation
         [switch] $NoIgnore
     )
 
+    $walker = "$PSScriptRoot/Walk/Get-Folder.ps1"
+    $command = "reload:pwsh -nop -f ""$walker"""
+    if( $Hidden ) { $command += " -Hidden" }
+    if( $NoIgnore ) { $command += " -NoIgnore" }
+
     $fzfArgs = Initialize-FzfArgs $path -FilePreview
+    $fzfArgs += "--bind", "start:$command"
+    $fzfArgs += "--bind", "alt-o:execute-silent:code {1}"
+    $fzfArgs += "--bind", "enter:accept"
+    $fzfArgs += "--preview-label", "Folder"
+    $fzfArgs += "--header-first", "--header", "enter: change folder, alt-o: open in VS code"
 
-    $fzfPreserved = $env:FZF_DEFAULT_COMMAND
-    $env:FZF_DEFAULT_COMMAND = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-Folder.ps1"""
-    if( $Hidden ) { $env:FZF_DEFAULT_COMMAND += " -Hidden" }
-    if( $NoIgnore ) { $env:FZF_DEFAULT_COMMAND += " -NoIgnore" }
-    try { $destination = @(fzf @fzfArgs) }
-    finally { $env:FZF_DEFAULT_COMMAND = $fzfPreserved; Repair-ConsoleMode }
-    $destination
+    $destinations = @(try{ fzf @fzfArgs } finally { Repair-ConsoleMode })
+    $destinations
 
-    if( $destination.Length -eq 1 )
+    if( $destinations.Length -eq 1 )
     {
-        cd $destination[0]
+        Set-Location $destinations[0]
     }
 }
 

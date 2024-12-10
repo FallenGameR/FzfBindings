@@ -16,7 +16,7 @@ if( -not $resolved )
 
 if( $resolved -is [System.IO.DirectoryInfo] )
 {
-    "Directory $(e 36)$resolved$(e 0)"
+    "$(e 36)$resolved$(e 0)"
 
     $folder = Get-ChildItem -LiteralPath $path
     if( $folder )
@@ -26,7 +26,8 @@ if( $resolved -is [System.IO.DirectoryInfo] )
         $rendered = $folder | ft -auto | Out-String
         $PSStyle.OutputRendering = $stylePreserved
 
-        "`n$(e 36)# Contents$(e 0)`n"
+        #"`n$(e 36)# Contents$(e 0)`n"
+        ""
         $rendered -split [environment]::NewLine | where{ $psitem } | select -skip 1
         #Push-Location $path
         #fd --max-depth 1 --color always -l
