@@ -338,12 +338,12 @@ function Search-FzfRipgrep
         "--line-number",
         "--no-heading",
         "--color=always",
+        "--smart-case"
         "--colors ""path:fg:0x3A,0x96,0xDD""",      # cyan
         "--colors ""line:fg:0x13,0xA1,0x0E""",      # green
         "--colors ""column:fg:0xF9,0xF1,0xA5""",    # bright yellow
         "--colors ""match:fg:0xE7,0x48,0x56""",     # bright red
         "--colors ""match:style:underline""",
-        "--smart-case"
 
     $rg = ($rg -join " ") + " "
     if( $Options )  { $rg += ($Options -join " ") + " " }
@@ -378,10 +378,11 @@ function Search-FzfRipgrep
     $fzfArgs += "--disabled"
     $fzfArgs += "--ansi"
     $fzfArgs += "--bind", "start:reload:$rg ""$Query"" || exit 0"
-    $fzfArgs += "--bind", "change:reload:$rg ""{q}"" || exit 0"
+    $fzfArgs += "--bind", "change:reload:$rg {q} || exit 0"
+    $fzfArgs += "--bind", "alt-o:execute-silent:code --goto {1}:{2}"
     #$fzfArgs += "--bind", "alt-f:unbind(change,alt-f)+change-prompt(rg|fzf> )+enable-search+clear-query+rebind(alt-r)"
     #$fzfArgs += "--bind", "alt-r:unbind(alt-r)+change-prompt(rg> )+disable-search+reload($rg ""{q}"" || cd .)+rebind(change,alt-f)"
-    $fzfArgs += "--header", '<ALT-R: rg> <ALT-F: fzf>'
+    $fzfArgs += "--header", 'ALT-F: fzf | ALT-R: ripgrep | ALT-O: VS code'
     $fzfArgs += "--tiebreak", "begin,length"
     $fzfArgs += "--color", "hl:-1:bold,hl+:-1:bold:reverse:"
     $fzfArgs += "--prompt", "rg> "
