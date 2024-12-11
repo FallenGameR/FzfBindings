@@ -49,7 +49,6 @@ if( Get-Command Register-Shortcut -ea Ignore )
     Register-Shortcut "Alt+r" "rgf" "Ripgrep search"
     Register-Shortcut "Alt+k" "killf" "Kill process"
     Register-Shortcut "Alt+f" "codef" "Code to open file or directory"
-    Register-Shortcut "Alt+v" "codef" "Code to open file or directory (shortcut from Vim"
     Register-Shortcut "Alt+d" "cdf" "Change directory"
     Register-Shortcut "Alt+u" "pushf" "Go up fuzzy"
     Register-Shortcut "Alt+s" "Select-GitBranch" "Switch to a git branch"
