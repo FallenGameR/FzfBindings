@@ -64,6 +64,7 @@ fzf --disabled --ansi --bind "start:$env:RELOAD" --bind "change:$env:RELOAD" `
      --delimiter ":" --preview 'bat --style=numbers --color=always --highlight-line {2} {1}' `
      --preview-window '+{2}/2'
 
+# +{2} is offset to the second token (line number), /2 show it in the middle of the screen
 # ~4 makes the top four lines “sticky”
 # +4 — We add 4 lines to the base offset to compensate for the header
 # /3 adjusts the offset so that the matching line is shown at a 1/3 position in the window

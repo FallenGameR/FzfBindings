@@ -97,9 +97,7 @@ function Set-FzfLocation
     $fzfArgs = Initialize-FzfArgs $path -FilePreview
     $fzfArgs += "--bind", "start:$command"
     $fzfArgs += "--bind", "alt-o:execute-silent:code {1}"
-    $fzfArgs += "--bind", "enter:accept"
     $fzfArgs += "--preview-label", "Folder"
-    $fzfArgs += "--header-first", "--header", "enter: change folder, alt-o: open in VS code"
 
     $destinations = @(try{ fzf @fzfArgs } finally { Repair-ConsoleMode })
     $destinations
@@ -319,6 +317,7 @@ function Search-FzfRipgrep
 
     .NOTES
         Adopted from https://github.com/junegunn/fzf/blob/master/ADVANCED.md#switching-between-ripgrep-mode-and-fzf-mode
+        And refined with https://junegunn.github.io/fzf/getting-started/
     #>
 
     param
@@ -338,12 +337,12 @@ function Search-FzfRipgrep
         "--line-number",
         "--no-heading",
         "--color=always",
-        "--smart-case"
+        "--smart-case",
         "--colors ""path:fg:0x3A,0x96,0xDD""",      # cyan
         "--colors ""line:fg:0x13,0xA1,0x0E""",      # green
         "--colors ""column:fg:0xF9,0xF1,0xA5""",    # bright yellow
         "--colors ""match:fg:0xE7,0x48,0x56""",     # bright red
-        "--colors ""match:style:underline""",
+        "--colors ""match:style:underline"""
 
     $rg = ($rg -join " ") + " "
     if( $Options )  { $rg += ($Options -join " ") + " " }
@@ -352,47 +351,34 @@ function Search-FzfRipgrep
     if( -not $NoRecasing ) { $Query = $Query.ToLower() }
     $command = "$rg ""$Query"""
 
-
-
-    <#
-    $fzfArgs = Initialize-FzfArgs $path -FilePreview
-    $fzfArgs += "--bind", "start:$command"
-    $fzfArgs += "--bind", "alt-o:execute-silent:code {1}"
-    $fzfArgs += "--bind", "enter:accept"
-    $fzfArgs += "--preview-label", "Folder"
-    $fzfArgs += "--header-first", "--header", "enter: change folder, alt-o: open in VS code"
-
-    $destinations = @(try{ fzf @fzfArgs } finally { Repair-ConsoleMode })
-    $destinations
-
-    fzf --disabled --ansi `
-        --bind "start:$env:RELOAD" --bind "change:$env:RELOAD"`
-        --delimiter ":" `
-        --preview 'bat -n --color=always --highlight-line {2} {1} --terminal-width %FZF_PREVIEW_COLUMNS%' `
-        --bind "alt-p:change-preview-window(right|down)" `
-        --preview-window '~4,+{2}+4/3,down' `
-        --bind 'ctrl-o:execute-silent:code {1}'
-    #>
-
+    # Compose fzf command
     $fzfArgs = Initialize-FzfArgs $Query
     $fzfArgs += "--disabled"
     $fzfArgs += "--ansi"
     $fzfArgs += "--bind", "start:reload:$rg ""$Query"" || exit 0"
     $fzfArgs += "--bind", "change:reload:$rg {q} || exit 0"
     $fzfArgs += "--bind", "alt-o:execute-silent:code --goto {1}:{2}"
-    #$fzfArgs += "--bind", "alt-f:unbind(change,alt-f)+change-prompt(rg|fzf> )+enable-search+clear-query+rebind(alt-r)"
-    #$fzfArgs += "--bind", "alt-r:unbind(alt-r)+change-prompt(rg> )+disable-search+reload($rg ""{q}"" || cd .)+rebind(change,alt-f)"
-    $fzfArgs += "--header", 'ALT-F: fzf | ALT-R: ripgrep | ALT-O: VS code'
+    $fzfArgs += "--bind", "alt-f:unbind(change,alt-f)+change-prompt(fzf> )+enable-search+rebind(alt-r)"
+    $fzfArgs += "--bind", "alt-r:unbind(alt-r)+change-prompt(rg> )+disable-search+reload($rg {q} || exit 0)+rebind(change,alt-f)"
+    $fzfArgs += "--bind", "enter:accept"
+    $fzfArgs += "--header-first"
+    $fzfArgs += "--header", "  alt shortcuts: Fzf | Ripgrep | Open | Wrap | arrows to resize"
+    $fzfArgs += "--prompt", "rg> "
     $fzfArgs += "--tiebreak", "begin,length"
     $fzfArgs += "--color", "hl:-1:bold,hl+:-1:bold:reverse:"
-    $fzfArgs += "--prompt", "rg> "
-    $fzfArgs += "--delimiter", ":"
-    $fzfArgs += "--preview", 'bat --color=always {1} --highlight-line {2}'
-    $fzfArgs += "--preview-label", 'Match'
-    #$fzfArgs += "--preview-window", 'up,border-bottom,+{2}/3,~3'
-    # +{2} - place in bat output, base offset to use for scrolling bat output to the highlighted line, from {2} token
-    # /3   - place in viewport to place the highlighted line, in fraction of the preview window height - near the middle of the screen but a bit higher
-    # ,~3  - pin top 3 lines from the bat output as the header, it would show the name of the file
+    $fzfArgs += "--delimiter=:"
+    $fzfArgs += "--preview", "bat --color=always {1} --highlight-line {2}"
+    $fzfArgs += "--preview-label=Match"
+    $fzfArgs += "--preview-window", '~4,+{2}+4/3,down'
+
+    ## reload - '|| exit 0' needed to handle errors from rg
+    ## --delimiter - split the fzf-selected line, {1} would be file name name, {2} would be line number
+
+    # ~4 makes the top four lines as a sticky header
+    # +{2} is offset to the second token (line number)
+    # +4 — add 4 lines to the base offset to compensate for the header
+    # /3 adjusts the offset so that the matching line is shown at a 1/3 position in the window
+    # start preview window in the down position (alt-arrows or double alt-p can change it)
 
     $result = try { fzf @fzfArgs } finally { Repair-ConsoleMode }
 
