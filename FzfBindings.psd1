@@ -74,6 +74,7 @@
     FileList = @(
         ".\FzfBindings.psd1",
         ".\FzfBindings.psm1",
+        ".\Defaults.ps1.ps1",
         ".\Initialize-GitFzf.ps1",
         ".\Initialize-ShellFzf.ps1",
         ".\Utils.ps1",

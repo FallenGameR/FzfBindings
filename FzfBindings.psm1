@@ -33,6 +33,7 @@ $SCRIPT:pwsh = "pwsh"
 if( $PSVersionTable.Platform -ne "Unix" ) { $SCRIPT:pwsh += ".exe" }
 
 # Include all used files
+. "$PSScriptRoot\Defaults.ps1"
 . "$PSScriptRoot\Utils.ps1"
 . "$PSScriptRoot\Initialize-ShellFzf.ps1"
 . "$PSScriptRoot\Initialize-GitFzf.ps1"
