@@ -3,7 +3,6 @@ $fzfOptions = @(
     "--layout=reverse",             # Grow list down, not upwards
     "--tabstop=4",                  # Standard tab size
     "--multi",                      # Multi select possible
-    "--wrap",                       # Wrap multiline entries
     "--bind", "alt-t:toggle-all",   # Alt+t toggles selection
     "--bind", "alt-w:toggle-wrap",  # Alt+t toggles wrap
     "--bind", "alt-q:backward-kill-word",  # Alt+q kills word
@@ -29,9 +28,15 @@ $fzfOptions = @(
 )
 
 $fzfVersion = [version]((fzf --version) -split " " | select -f 1)
+
 if( $fzfVersion -ge ([version] "0.42.0") )
 {
     $fzfOptions += "--info=right"   # Show found element count on the right(0.42)
+}
+
+if( $fzfVersion -ge ([version] "0.56.0") )
+{
+    $fzfOptions += "--wrap"         # Wrap multiline entries
 }
 
 $env:FZF_DEFAULT_OPTS = $fzfOptions -join " "

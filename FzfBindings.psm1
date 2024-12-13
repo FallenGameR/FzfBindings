@@ -7,7 +7,7 @@ function SCRIPT:Assert-ToolInstalled( $name, [switch] $IsWarning )
 
         if( $IsWarning )
         {
-            Write-Warning "$info, although it is not critical"
+            Write-Warning "$info, some functionality would not work for now"
         }
         else
         {
@@ -17,9 +17,10 @@ function SCRIPT:Assert-ToolInstalled( $name, [switch] $IsWarning )
 }
 
 Assert-ToolInstalled fzf
-Assert-ToolInstalled bat
-Assert-ToolInstalled chafa -IsWarning
-Assert-ToolInstalled glow -IsWarning
+Assert-ToolInstalled bat -IsWarning
+Assert-ToolInstalled rg -IsWarning
+#Assert-ToolInstalled chafa -IsWarning
+#Assert-ToolInstalled glow -IsWarning
 
 $fzfVersion = (fzf --version) -split " " | select -f 1
 $fzfMinVersion = "0.31"

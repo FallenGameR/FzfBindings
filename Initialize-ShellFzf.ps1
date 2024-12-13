@@ -265,6 +265,7 @@ function Invoke-FzfCode
 
             $fzfArgs = Initialize-FzfArgs -FilePreview
             $fzfArgs += "--bind", "start:$command"
+            $fzfArgs += "--bind", "alt-o:execute-silent:code {1}"
             $paths = @(try { fzf @fzfArgs } finally { Repair-ConsoleMode })
         }
 
