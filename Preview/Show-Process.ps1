@@ -37,4 +37,4 @@ else
     if( $matches["args"] ) { -split $matches["args"] }
 }
 
-$process.Modules | ft -auto
+$process.Modules | select Size, FileName | sort FileName | ft -auto
