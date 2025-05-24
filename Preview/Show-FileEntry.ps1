@@ -50,3 +50,4 @@ if( ($resolved.Extension -in $markdown) -and (gcm glow -ea Ignore) )
 }
 
 & bat $path --color=always --plain
+
