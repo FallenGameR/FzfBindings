@@ -39,7 +39,7 @@ if( $resolved -is [System.IO.DirectoryInfo] )
 
 if( ($resolved.Extension -in $pictures) -and (gcm chafa -ea Ignore) )
 {
-    chafa $path # -f sixels doesn't work in fzf on Windows yet
+    chafa $path # -f sixel --passthrough auto
     return
 }
 
