@@ -21,8 +21,11 @@ function Initialize-FzfArgs
     }
 
     # Preview engine
+    # Height parameter is a workaround for fzf bug https://github.com/junegunn/fzf/issues/4399
+    # It forces fzf to use a different preview engine, the one that supports sixels
     if( $FilePreview )
     {
+        "--height=-1"
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}"
         "--preview-label"
