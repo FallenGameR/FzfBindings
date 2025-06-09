@@ -6,7 +6,7 @@
     RootModule = 'FzfBindings.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.12.20250602'
+    ModuleVersion = '1.13.20250609'
 
     # ID used to uniquely identify this module
     GUID = 'fb98390c-1080-4d3a-ab8a-439d02e995f6'
@@ -81,7 +81,7 @@
         ".\notes.md",
         ".\readme.md",
         ".\Bin\.gitignore",
-        ".\Bin\Walker\walker.exe",
+        #".\Bin\Walker\walker.exe",
         ".\Data\excluded_folders",
         ".\Data\picture_extensions",
         ".\Preview\Show-FileEntry.ps1",
