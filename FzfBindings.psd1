@@ -80,7 +80,7 @@
         ".\Utils.ps1",
         ".\notes.md",
         ".\readme.md",
-        #".\Bin\.gitignore",
+        ".\Bin\.gitignore",
         #".\Bin\Walker\walker.exe",
         ".\Data\excluded_folders",
         ".\Data\picture_extensions",
