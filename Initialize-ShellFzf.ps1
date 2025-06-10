@@ -82,7 +82,7 @@ function Set-FzfLocation
         be treated as ignored.
     #>
 
-    [cmdletbinding]
+    [cmdletbinding()]
     param
     (
         [string] $Path,
