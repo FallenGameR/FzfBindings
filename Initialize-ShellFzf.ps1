@@ -82,6 +82,7 @@ function Set-FzfLocation
         be treated as ignored.
     #>
 
+    [cmdletbinding]
     param
     (
         [string] $Path,
@@ -98,6 +99,7 @@ function Set-FzfLocation
     $fzfArgs += "--bind", "start:$command"
     $fzfArgs += "--bind", "alt-o:execute-silent:code {1}"
     $fzfArgs += "--preview-label", "Folder"
+    Write-Verbose "FZF args: $fzfArgs"
 
     $destinations = @(try{ fzf @fzfArgs } finally { Repair-ConsoleMode })
     $destinations
