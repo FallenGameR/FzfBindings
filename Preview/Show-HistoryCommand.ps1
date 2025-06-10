@@ -1,13 +1,14 @@
-if( $PSVersionTable.PSVersion -ge 7 )
-{
-    $id, $duration, $command = -split $args[0]
-}
-else
-{
-    $id, $command = -split $args[0]
-}
-
 # Can't use Get-History here, this script is called from a separate process
+# And that process may have been actually Powershell Classic v5
+
+$id, $duration, $command = -split $args[0]
+
+# PS5 would not have duration listed
+if( $duration -notmatch "^\d+\.\d+$")
+{
+    $command = $duration
+    $duration = ""
+}
 
 function SCRIPT:e { "`e[" + ($args -join ";") + "m" }
 
