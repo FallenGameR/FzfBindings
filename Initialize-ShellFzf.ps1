@@ -90,18 +90,42 @@ function Set-FzfLocation
         [switch] $NoIgnore
     )
 
-    $walker = "$PSScriptRoot/Walk/Get-Folder.ps1"
-    $command = "reload:pwsh -nop -f ""$walker"""
+    # Walker command
+    $command = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-Folder.ps1"""
     if( $Hidden ) { $command += " -Hidden" }
     if( $NoIgnore ) { $command += " -NoIgnore" }
 
-    $fzfArgs = Initialize-FzfArgs $path -FilePreview
-    $fzfArgs += "--bind", "start:$command"
-    $fzfArgs += "--bind", "alt-o:execute-silent:code {1}"
-    $fzfArgs += "--preview-label", "Folder"
+    # FZF arguments
+    function Get-FzfArgs
+    {
+        Initialize-FzfArgs $path -FilePreview
+        "--bind", "alt-o:execute-silent:code {1}"
+        Use-Version 0.35 "--preview-label", "Folder"
+        Use-Version 0.54 "--bind", "start:reload:$command"
+    }
+    $fzfArgs = Get-FzfArgs
     Write-Verbose "FZF args: $fzfArgs"
 
-    $destinations = @(try{ fzf @fzfArgs } finally { Repair-ConsoleMode })
+    # Call
+    $destinations = @(try
+    {
+        if( $SCRIPT:fzfVersion -lt 0.54 )
+        {
+            $fzfPreserved, $env:FZF_DEFAULT_COMMAND = $env:FZF_DEFAULT_COMMAND, $command
+            Write-Verbose "FZF command: $env:FZF_DEFAULT_COMMAND"
+        }
+        fzf @fzfArgs
+    }
+    finally
+    {
+        if( $SCRIPT:fzfVersion -lt 0.54 )
+        {
+            $env:FZF_DEFAULT_COMMAND = $fzfPreserved
+        }
+        Repair-ConsoleMode
+    })
+
+    # Processing
     $destinations
 
     if( $destinations.Length -eq 1 )
