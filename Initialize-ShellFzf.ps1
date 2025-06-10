@@ -270,7 +270,7 @@ function Invoke-FzfCode
         # Select paths
         if( -not $paths )
         {
-            $command = "pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""
+            $command = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""
 
             function Get-FzfArgs
             {

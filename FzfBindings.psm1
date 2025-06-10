@@ -23,9 +23,16 @@ Assert-ToolInstalled rg -IsWarning
 #Assert-ToolInstalled chafa -IsWarning
 #Assert-ToolInstalled glow -IsWarning
 
-# Cross platform way to call pwsh
+# This variable would be used to call preview scripts
+# Theoretically previews in classic Powershell could be faster if we don't call modern powershell
+# from classic powershell. But then the preview scripts would need to be reworked as well
 $SCRIPT:pwsh = "pwsh"
-if( $PSVersionTable.Platform -ne "Unix" ) { $SCRIPT:pwsh += ".exe" }
+
+if( $PSVersionTable.Platform -ne "Unix" )
+{
+    # Cross platform way to call pwsh
+    $SCRIPT:pwsh += ".exe"
+}
 
 # Include all used files
 . "$PSScriptRoot\Defaults.ps1"
