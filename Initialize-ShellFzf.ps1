@@ -117,8 +117,7 @@ function Start-FzfProcess
         [string] $Path
     )
 
-    $fzfArgs = Initialize-FzfArgs $Path
-    $destination = try{ fzf @fzfArgs } finally { Repair-ConsoleMode }
+    $destination = Use-Fzf (Initialize-FzfArgs $Path)
     $destination
 
     if( $destination )

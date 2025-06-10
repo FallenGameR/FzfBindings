@@ -24,7 +24,6 @@ function Initialize-FzfArgs
     if( $FilePreview )
     {
         Use-Version 0.35 "--preview-label", "File Entry"
-
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}"
 
