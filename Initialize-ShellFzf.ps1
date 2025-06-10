@@ -127,6 +127,8 @@ function Set-FzfLocation
     {
         Set-Location $destinations[0]
     }
+
+    Repair-ConsoleMode
 }
 
 function Stop-FzfProcess
@@ -202,10 +204,13 @@ function Push-FzfLocation
     }
 
     $path = Get-DirectoryStack | Sort-Object -desc | Show-FzfFilePreview
+
     if( $path )
     {
-        pushd $path
+        Push-Location $path
     }
+
+    Repair-ConsoleMode
 }
 
 function Invoke-FzfHistory

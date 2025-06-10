@@ -103,7 +103,7 @@ function Initialize-FzfArgs
         # Height parameter is a workaround for fzf bug https://github.com/junegunn/fzf/issues/4399
         # It forces fzf to use a different preview engine, the one that supports sixels
         # Older fzf versions do not support negative height
-        # and likelly don't know about sixels (that was not tested though)
+        # and likelly don't know about sixels (it was confirmed on 0.34)
         Use-Version 0.56 "--height=-1"
     }
 
