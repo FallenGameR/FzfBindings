@@ -270,13 +270,16 @@ function Invoke-FzfCode
         # Select paths
         if( -not $paths )
         {
-            $walker = "$PSScriptRoot/Walk/Get-FileEntry.ps1"
-            $command = "reload:pwsh -nop -f ""$walker"""
+            $command = "pwsh -nop -f ""$PSScriptRoot/Walk/Get-FileEntry.ps1"""
 
-            $fzfArgs = Initialize-FzfArgs -FilePreview
-            $fzfArgs += "--bind", "start:$command"
-            $fzfArgs += "--bind", "alt-o:execute-silent:code {1}"
-            $paths = @(try { fzf @fzfArgs } finally { Repair-ConsoleMode })
+            function Get-FzfArgs
+            {
+                Initialize-FzfArgs -FilePreview
+                "--bind", "start:reload:$command"
+                "--bind", "alt-o:execute-silent:code --goto {1}"
+            }
+
+            $paths = Use-Fzf (Get-FzfArgs)
         }
 
         # Invoke code
@@ -360,27 +363,29 @@ function Search-FzfRipgrep
     if( $Hidden )   { $rg += "--hidden " }
     if( $NoIgnore ) { $rg += "--no-ignore " }
     if( -not $NoRecasing ) { $Query = $Query.ToLower() }
-    $command = "$rg ""$Query"""
 
     # Compose fzf command
-    $fzfArgs = Initialize-FzfArgs $Query
-    $fzfArgs += "--disabled"
-    $fzfArgs += "--ansi"
-    $fzfArgs += "--bind", "start:reload:$rg ""$Query"" || exit 0"
-    $fzfArgs += "--bind", "change:reload:$rg {q} || exit 0"
-    $fzfArgs += "--bind", "alt-o:execute-silent:code --goto {1}:{2}"
-    $fzfArgs += "--bind", "alt-f:unbind(change,alt-f)+change-prompt(fzf> )+enable-search+rebind(alt-r)"
-    $fzfArgs += "--bind", "alt-r:unbind(alt-r)+change-prompt(rg> )+disable-search+reload($rg {q} || exit 0)+rebind(change,alt-f)"
-    $fzfArgs += "--bind", "enter:accept"
-    $fzfArgs += "--header-first"
-    $fzfArgs += "--header", "  alt shortcuts: Fzf | Ripgrep | Open | Wrap | arrows to resize"
-    $fzfArgs += "--prompt", "rg> "
-    $fzfArgs += "--tiebreak", "begin,length"
-    $fzfArgs += "--color", "hl:-1:bold,hl+:-1:bold:reverse:"
-    $fzfArgs += "--delimiter=:"
-    $fzfArgs += "--preview", "bat --color=always {1} --highlight-line {2}"
-    $fzfArgs += "--preview-label=Match"
-    $fzfArgs += "--preview-window", '~4,+{2}+4/3,down'
+    function Get-FzfArgs
+    {
+        Initialize-FzfArgs $Query
+        "--disabled"
+        "--ansi"
+        "--bind", "start:reload:$rg ""$Query"" || exit 0"
+        "--bind", "change:reload:$rg {q} || exit 0"
+        "--bind", "alt-o:execute-silent:code --goto {1}:{2}"
+        "--bind", "alt-f:unbind(change,alt-f)+change-prompt(fzf> )+enable-search+rebind(alt-r)"
+        "--bind", "alt-r:unbind(alt-r)+change-prompt(rg> )+disable-search+reload($rg {q} || exit 0)+rebind(change,alt-f)"
+        "--bind", "enter:accept"
+        "--header-first"
+        "--header", "  alt shortcuts: Fzf | Ripgrep | Open | Wrap | arrows to resize"
+        "--prompt", "rg> "
+        "--tiebreak", "begin,length"
+        "--color", "hl:-1:bold,hl+:-1:bold:reverse:"
+        "--delimiter=:"
+        "--preview", "bat --color=always {1} --highlight-line {2}"
+        "--preview-label", "Match"
+        "--preview-window", '~4,+{2}+4/3,down'
+    }
 
     ## reload - '|| exit 0' needed to handle errors from rg
     ## --delimiter - split the fzf-selected line, {1} would be file name name, {2} would be line number
@@ -391,7 +396,7 @@ function Search-FzfRipgrep
     # /3 adjusts the offset so that the matching line is shown at a 1/3 position in the window
     # start preview window in the down position (alt-arrows or double alt-p can change it)
 
-    $result = try { fzf @fzfArgs } finally { Repair-ConsoleMode }
+    $result = Use-Fzf (Get-FzfArgs)
 
     $paths = $result |
         foreach{ ($psitem -split ":" | select -f 3) -join ":" } |
@@ -404,38 +409,4 @@ function Search-FzfRipgrep
     {
         codef $paths
     }
-}
-
-function Repair-ConsoleMode
-{
-    <#
-    .SYNOPSIS
-        fzf sets DISABLE_NEWLINE_AUTO_RETURN console mode flag that breaks the console.
-        This command can be used to restore the correct console mode.
-
-    .NOTES
-        https://github.com/junegunn/fzf/issues/3334
-
-        fzf seems to have a background thread that can mess up the console mode even after
-        the main thread is killed and the console get control from the fzf back
-
-        so far the only robust way to fix it is to call this from the prompt function
-    #>
-
-    $GetStdHandle = '[DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr GetStdHandle(int nStdHandle);'
-    $GetConsoleMode = '[DllImport("kernel32.dll", SetLastError = true)] public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);'
-    $SetConsoleMode = '[DllImport("kernel32.dll", SetLastError = true)] public static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint lpMode);'
-    $Kernel32 = Add-Type `
-        -Name 'Kernel32' `
-        -Namespace 'Win32' `
-        -PassThru `
-        -MemberDefinition "$GetStdHandle $GetConsoleMode $SetConsoleMode"
-
-    # Sometimes there are races with fzf that seems to set the console mode in an async way after set
-    [UInt32] $mode = 0
-    $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode) | Out-Null
-
-    $DISABLE_NEWLINE_AUTO_RETURN = 0x8
-    $mode = $mode -band (-bnot $DISABLE_NEWLINE_AUTO_RETURN)
-    $Kernel32::SetConsoleMode($Kernel32::GetStdHandle(-11), $mode) | Out-Null
 }
