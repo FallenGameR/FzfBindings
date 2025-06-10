@@ -17,21 +17,35 @@ function Use-Fzf
         # All not supported arguments are removed or mitigated
         $args = @(for( $i = 0; $i -lt $args.Count; $i++ )
         {
+            if( ($args[$i] -eq "--preview-label") -and
+                ($SCRIPT:fzfVersion -lt 0.35) )
+            {
+                Write-Verbose "FZF $($args[$i]) $($args[$i+1]) skip"
+                $i += 1
+                continue
+            }
+
             if( ($args[$i] -eq "--bind") -and
                 ($args[$i+1] -match "^start:reload:(.+)$") -and
                 ($SCRIPT:fzfVersion -lt 0.54) )
             {
                 $startReloadCommandFallback = $matches[1]
-                Write-Verbose "FZF start:reload mitigation for: $startReloadCommandFallback"
+                Write-Verbose "FZF $($args[$i]) $($args[$i+1]) mitigation for: $startReloadCommandFallback"
                 $i += 1
                 continue
             }
 
-            if( ($args[$i] -eq "--preview-label") -and
-                ($SCRIPT:fzfVersion -lt 0.35) )
+            if( ($args[$i] -match ":toggle-wrap$") -and
+                ($SCRIPT:fzfVersion -lt 0.54) )
             {
-                Write-Verbose "FZF --preview-label $($args[$i+1]) skip"
-                $i += 1
+                Write-Verbose "FZF $($args[$i]) skip"
+                continue
+            }
+
+            if( ($args[$i] -eq "--height=-1") -and
+                ($SCRIPT:fzfVersion -lt 0.56) )
+            {
+                Write-Verbose "FZF $($args[$i]) skip"
                 continue
             }
 
@@ -97,21 +111,20 @@ function Initialize-FzfArgs
     # Preview engine
     if( $FilePreview )
     {
-        Use-Version 0.35 "--preview-label", "File Entry"
+        "--preview-label", "File Entry"
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}"
 
         # Height parameter is a workaround for fzf bug https://github.com/junegunn/fzf/issues/4399
         # It forces fzf to use a different preview engine, the one that supports sixels
-        # Older fzf versions do not support negative height
-        # and likelly don't know about sixels (it was confirmed on 0.34)
-        Use-Version 0.56 "--height=-1"
+        # Note that older fzf versions do not support negative height and likelly
+        # don't know about sixels (sixel piece confirmed for 0.34)
+        "--height=-1"
     }
 
     if( $BranchPreview )
     {
-        Use-Version 0.35 "--preview-label", "Branch"
-
+        "--preview-label", "Branch"
         "--header-lines=2"
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-GitBranch.ps1"" {}"
@@ -119,8 +132,7 @@ function Initialize-FzfArgs
 
     if( $ProcessPreview )
     {
-        Use-Version 0.35 "--preview-label", "Process"
-
+        "--preview-label", "Process"
         "--header-lines=2"
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-Process.ps1"" {}"
@@ -128,8 +140,7 @@ function Initialize-FzfArgs
 
     if( $HistoryPreview )
     {
-        Use-Version 0.35 "--preview-label", "History"
-
+        "--preview-label", "History"
         "--header-lines=2"
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-HistoryCommand.ps1"" {}"
@@ -140,7 +151,7 @@ function Initialize-FzfArgs
     "--color=preview-bg:#222222"
     "--padding=1%"
     "--border=rounded"
-    Use-Version 0.54 "--bind=alt-w:toggle-wrap"
+    "--bind=alt-w:toggle-wrap"
 
     # Preview size changes need to be compatible with different terminals:
     # - VS code does not work with Alt+arrow
