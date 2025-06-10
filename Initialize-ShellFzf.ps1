@@ -9,13 +9,31 @@ function Show-FzfFilePreview
         the input would be collected. That is important for huge inputs.
 
         If you want async fast output your would need to fzf directly
-        and maybe to combine it with walker as it is done in cdf and CodeF.
+        or redefine it's walker command similarly how cdf and codef do it.
 
     .EXAMPLE
         ls | % FullName | pf
     #>
 
-    $input | Use-Fzf (Initialize-FzfArgs -FilePreview)
+    [cmdletbinding()]
+    param
+    (
+        [Parameter(ValueFromPipeline = $true)]
+        $Item
+    )
+
+    begin
+    {
+        $pipeline = @()
+    }
+    process
+    {
+        $pipeline += $item
+    }
+    end
+    {
+        $pipeline | Use-Fzf (Initialize-FzfArgs -FilePreview)
+    }
 }
 
 function Start-FzfProcess
