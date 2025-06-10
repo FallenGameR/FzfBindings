@@ -447,9 +447,14 @@ function Repair-ConsoleMode
         -MemberDefinition "$GetStdHandle $GetConsoleMode $SetConsoleMode"
 
     [UInt32] $mode = 0
-    $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode) | Out-Null
+    $get = $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode)
+    Write-Host "Console mode: $mode, GetStdHandle: $get" -ForegroundColor Cyan
 
     $DISABLE_NEWLINE_AUTO_RETURN = 0x8
     $mode = $mode -band (-bnot $DISABLE_NEWLINE_AUTO_RETURN)
-    $Kernel32::SetConsoleMode($Kernel32::GetStdHandle(-11), $mode) | Out-Null
+    $set = $Kernel32::SetConsoleMode($Kernel32::GetStdHandle(-11), $mode)
+    Write-Host "Console mode: $mode, SetStdHandle: $get" -ForegroundColor Cyan
+
+    $get = $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode)
+    Write-Host "Console mode: $mode, GetStdHandle: $get" -ForegroundColor Cyan
 }
