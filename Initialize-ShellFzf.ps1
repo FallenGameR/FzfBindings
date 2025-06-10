@@ -3,39 +3,74 @@ function SCRIPT:Use-Fzf
     [cmdletbinding()]
     param
     (
-        [string[]] $FzfArgs,
-        [string] $FzfCommand,
+        [string[]] $Args,
+
         [Parameter(ValueFromPipeline = $true)]
-        [object] $InputItem
+        [object] $Item
     )
 
     begin
     {
-        Write-Verbose "FZF args: $fzfArgs"
         $input = @()
+        $startReloadCommandFallback = ""
+
+        # All not supported arguments are removed or mitigated
+        $args = @(for( $i = 0; $i -lt $args.Count; $i++ )
+        {
+            if( ($args[$i] -eq "--bind") -and
+                ($args[$i+1] -match "^start:reload:(.+)$") -and
+                ($SCRIPT:fzfVersion -lt 0.54) )
+            {
+                $startReloadCommandFallback = $matches[1]
+                Write-Verbose "FZF start:reload mitigation for: $startReloadCommandFallback"
+                $i += 1
+                continue
+            }
+
+            if( ($args[$i] -eq "--preview-label") -and
+                ($SCRIPT:fzfVersion -lt 0.35) )
+            {
+                Write-Verbose "FZF --preview-label $($args[$i+1]) skip"
+                $i += 1
+                continue
+            }
+
+            $args[$i]
+        })
+
+        Write-Verbose "FZF args: $args"
     }
     process
     {
         # Async processing coould be possible only if we do [Process]::Start
-        $input += $InputItem
+        $input += $item
     }
     end
     {
         try
         {
-            if( $SCRIPT:fzfVersion -lt 0.54 )
+            if( $startReloadCommandFallback )
             {
-                $fzfPreserved, $env:FZF_DEFAULT_COMMAND = $env:FZF_DEFAULT_COMMAND, $command
-                Write-Verbose "FZF command: $env:FZF_DEFAULT_COMMAND"
+                $preserved = $env:FZF_DEFAULT_COMMAND
+                $env:FZF_DEFAULT_COMMAND = $startReloadCommandFallback
             }
-            fzf @fzfArgs
+
+            if( $input )
+            {
+                $input | fzf @Args
+            }
+            else
+            {
+                fzf @Args
+            }
         }
         finally
         {
-            if( $SCRIPT:fzfVersion -lt 0.54 )
+            if( $startReloadCommandFallback )
             {
-                $env:FZF_DEFAULT_COMMAND = $fzfPreserved
+                $env:FZF_DEFAULT_COMMAND = $preserved
             }
+
             Repair-ConsoleMode
         }
     }
@@ -133,44 +168,20 @@ function Set-FzfLocation
         [switch] $NoIgnore
     )
 
-    # Walker command
     $command = "$pwsh -nop -f ""$PSScriptRoot/Walk/Get-Folder.ps1"""
     if( $Hidden ) { $command += " -Hidden" }
     if( $NoIgnore ) { $command += " -NoIgnore" }
 
-    # FZF arguments
     function Get-FzfArgs
     {
         Initialize-FzfArgs $path -FilePreview
         "--bind", "alt-o:execute-silent:code {1}"
-        Use-Version 0.35 "--preview-label", "Folder"
-        Use-Version 0.54 "--bind", "start:reload:$command"
+        "--bind", "start:reload:$command"
+        "--preview-label", "Folder"
     }
-    $fzfArgs = Get-FzfArgs
 
-
-    Write-Verbose "FZF args: $fzfArgs"
-
-    # Call
-    $destinations = @(try
-    {
-        if( $SCRIPT:fzfVersion -lt 0.54 )
-        {
-            $fzfPreserved, $env:FZF_DEFAULT_COMMAND = $env:FZF_DEFAULT_COMMAND, $command
-            Write-Verbose "FZF command: $env:FZF_DEFAULT_COMMAND"
-        }
-        fzf @fzfArgs
-    }
-    finally
-    {
-        if( $SCRIPT:fzfVersion -lt 0.54 )
-        {
-            $env:FZF_DEFAULT_COMMAND = $fzfPreserved
-        }
-        Repair-ConsoleMode
-    })
-
-    # Processing
+    # Call FZF
+    $destinations = @(Use-Fzf (Get-FzfArgs))
     $destinations
 
     if( $destinations.Length -eq 1 )
