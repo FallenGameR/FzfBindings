@@ -23,36 +23,34 @@ function Initialize-FzfArgs
     # Preview engine
     if( $FilePreview )
     {
-        # Height parameter is a workaround for fzf bug https://github.com/junegunn/fzf/issues/4399
-        # It forces fzf to use a different preview engine, the one that supports sixels
-        # Old fzf versions do not support negative height and likelly don't know about sixels
-        if( $fzfVersion -ge ([version] "0.56") )
-        {
-            "--height=-1"
-        }
+        Use-Version 0.35 "--preview-label", "File Entry"
 
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-FileEntry.ps1"" {}"
-        "--preview-label"
-        "File Entry"
+
+        # Height parameter is a workaround for fzf bug https://github.com/junegunn/fzf/issues/4399
+        # It forces fzf to use a different preview engine, the one that supports sixels
+        # Older fzf versions do not support negative height
+        # and likelly don't know about sixels (that was not tested though)
+        Use-Version 0.56 "--height=-1"
     }
 
     if( $BranchPreview )
     {
+        Use-Version 0.35 "--preview-label", "Branch"
+
         "--header-lines=2"
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-GitBranch.ps1"" {}"
-        "--preview-label"
-        "Branch"
     }
 
     if( $ProcessPreview )
     {
+        Use-Version 0.35 "--preview-label", "Process"
+
         "--header-lines=2"
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-Process.ps1"" {}"
-        "--preview-label"
-        "Process"
     }
 
     # Preview defaults
@@ -60,11 +58,7 @@ function Initialize-FzfArgs
     "--color=preview-bg:#222222"
     "--padding=1%"
     "--border=rounded"
-
-    if( $SCRIPT:fzfVersion -ge ([version] "0.56.0") )
-    {
-        "--bind=alt-w:toggle-wrap"
-    }
+    Use-Version 0.54 "--bind=alt-w:toggle-wrap"
 
     # Preview size changes need to be compatible with different terminals:
     # - VS code does not work with Alt+arrow
