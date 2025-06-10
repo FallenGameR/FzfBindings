@@ -248,13 +248,15 @@ function Clear-GitBranch( $name, [switch] $Force )
 
 function SCRIPT:Select-FzfGitBranch( $key, $fzfFilter )
 {
-    # NOTE: it looks like this call ocasionally messes up the CR symbols in the terminal
-    # is caused by preview? There is no FZF_COMMAND replacement here.
-    $fzfArgs = @(Initialize-FzfArgs $fzfFilter -BranchPreview)
-
-    # Query via fzf and reconstruct as objects
     $objects = @($input)
-    $selected = try{ @($objects | ft -auto | Out-String | % trim | fzf @fzfArgs) } finally { Repair-ConsoleMode }
+
+    $selected =
+        $objects |
+        Format-Table -auto |
+        Out-String |
+        foreach Trim |
+        Use-Fzf (Initialize-FzfArgs $fzfFilter -BranchPreview)
+
     $selected |
         where{ $psitem -match "^(\S+)"} |
         foreach{ $matches[1]} |
