@@ -83,7 +83,8 @@ function Initialize-FzfArgs
         [string] $Query,
         [switch] $FilePreview,
         [switch] $BranchPreview,
-        [switch] $ProcessPreview
+        [switch] $ProcessPreview,
+        [switch] $HistoryPreview
     )
 
     # Optional pre-populated fzf query string
@@ -123,6 +124,15 @@ function Initialize-FzfArgs
         "--header-lines=2"
         "--preview"
         "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-Process.ps1"" {}"
+    }
+
+    if( $HistoryPreview )
+    {
+        Use-Version 0.35 "--preview-label", "History"
+
+        "--header-lines=2"
+        "--preview"
+        "$pwsh -nop -f ""$PSScriptRoot/Preview/Show-HistoryCommand.ps1"" {}"
     }
 
     # Preview defaults

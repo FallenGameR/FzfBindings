@@ -125,36 +125,6 @@ function Set-FzfLocation
     }
 }
 
-function Stop-FzfProcess
-{
-    <#
-    .SYNOPSIS
-        Kill processes after a fzf search by name
-
-    .PARAMETER Name
-        Part of the process name to initialize fzf filter.
-        Or search the process in an interactive way without initialization.
-
-    .EXAMPLE
-        killf nuget
-    #>
-
-    [cmdletbinding()]
-    param
-    (
-        [string] $Name
-    )
-
-    function Get-FzfArgs
-    {
-        Initialize-FzfArgs $Name -ProcessPreview
-        "--height=90%" # See a few lines of PS console in case we just dumped $pid to kill it
-    }
-
-    $lines = Get-Process | Format-Table -Auto | Out-String | foreach Trim | Use-Fzf (Get-FzfArgs)
-    $lines | foreach{ Stop-Process -Id (-split $psitem)[4] -Verbose -ea Ignore }
-}
-
 function Push-FzfLocation
 {
     <#
@@ -203,6 +173,36 @@ function Push-FzfLocation
     Push-Location $result
 }
 
+function Stop-FzfProcess
+{
+    <#
+    .SYNOPSIS
+        Kill processes after a fzf search by name
+
+    .PARAMETER Name
+        Part of the process name to initialize fzf filter.
+        Or search the process in an interactive way without initialization.
+
+    .EXAMPLE
+        killf nuget
+    #>
+
+    [cmdletbinding()]
+    param
+    (
+        [string] $Name
+    )
+
+    function Get-FzfArgs
+    {
+        Initialize-FzfArgs $Name -ProcessPreview
+        "--height=90%" # See a few lines of PS console in case we just dumped $pid to kill it
+    }
+
+    $lines = Get-Process | Format-Table -Auto | Out-String | foreach Trim | Use-Fzf (Get-FzfArgs)
+    $lines | foreach{ Stop-Process -Id (-split $psitem)[4] -Verbose -ea Ignore }
+}
+
 function Invoke-FzfHistory
 {
     <#
@@ -218,7 +218,7 @@ function Invoke-FzfHistory
 
     $commands = @(Get-History)
     [array]::Reverse($commands)
-    $result = ($commands | Out-String) -split [Environment]::NewLine | select -Skip 3 | Use-Fzf (Initialize-FzfArgs)
+    $result = $commands | Format-Table -Auto | Out-String | foreach Trim | Use-Fzf (Initialize-FzfArgs -HistoryPreview)
     if( -not $result ) { return }
 
     $ids = $result | where{ $psitem -match "^\s*(\d+)" } | foreach{ [int] $matches[1] }
