@@ -22,13 +22,6 @@ Assert-ToolInstalled rg -IsWarning
 #Assert-ToolInstalled chafa -IsWarning
 #Assert-ToolInstalled glow -IsWarning
 
-$fzfVersion = (fzf --version) -split " " | select -f 1
-$fzfMinVersion = "0.31"
-if( [version]::Parse($fzfVersion) -lt $fzfMinVersion )
-{
-    throw "fzf version $fzfVersion installed, but at least $fzfMinVersion is needed, please update it first"
-}
-
 # Cross platform way to call pwsh
 $SCRIPT:pwsh = "pwsh"
 if( $PSVersionTable.Platform -ne "Unix" ) { $SCRIPT:pwsh += ".exe" }
@@ -38,6 +31,12 @@ if( $PSVersionTable.Platform -ne "Unix" ) { $SCRIPT:pwsh += ".exe" }
 . "$PSScriptRoot\Utils.ps1"
 . "$PSScriptRoot\Initialize-ShellFzf.ps1"
 . "$PSScriptRoot\Initialize-GitFzf.ps1"
+
+$fzfMinVersion = "0.31"
+if( $SCRIPT:fzfVersion -lt $fzfMinVersion )
+{
+    throw "fzf version $fzfVersion installed, but at least $fzfMinVersion is needed, please update it first"
+}
 
 # Set up aliases
 Set-Alias cdf Set-FzfLocation
