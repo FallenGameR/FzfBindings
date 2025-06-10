@@ -1,3 +1,46 @@
+function SCRIPT:Use-Fzf
+{
+    [cmdletbinding()]
+    param
+    (
+        [string[]] $FzfArgs,
+        [string] $FzfCommand,
+        [Parameter(ValueFromPipeline = $true)]
+        [object] $InputItem
+    )
+
+    begin
+    {
+        Write-Verbose "FZF args: $fzfArgs"
+        $input = @()
+    }
+    process
+    {
+        # Async processing coould be possible only if we do [Process]::Start
+        $input += $InputItem
+    }
+    end
+    {
+        try
+        {
+            if( $SCRIPT:fzfVersion -lt 0.54 )
+            {
+                $fzfPreserved, $env:FZF_DEFAULT_COMMAND = $env:FZF_DEFAULT_COMMAND, $command
+                Write-Verbose "FZF command: $env:FZF_DEFAULT_COMMAND"
+            }
+            fzf @fzfArgs
+        }
+        finally
+        {
+            if( $SCRIPT:fzfVersion -lt 0.54 )
+            {
+                $env:FZF_DEFAULT_COMMAND = $fzfPreserved
+            }
+            Repair-ConsoleMode
+        }
+    }
+}
+
 function Show-FzfFilePreview
 {
     <#
@@ -104,6 +147,8 @@ function Set-FzfLocation
         Use-Version 0.54 "--bind", "start:reload:$command"
     }
     $fzfArgs = Get-FzfArgs
+
+
     Write-Verbose "FZF args: $fzfArgs"
 
     # Call
