@@ -93,8 +93,7 @@ function Show-FzfFilePreview
         ls | % FullName | pf
     #>
 
-    try{ $input | fzf @(Initialize-FzfArgs -FilePreview) }
-    finally{ Repair-ConsoleMode }
+    $input | Use-Fzf (Initialize-FzfArgs -FilePreview)
 }
 
 function Start-FzfProcess
