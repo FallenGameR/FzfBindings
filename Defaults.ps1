@@ -29,12 +29,12 @@ $fzfOptions = @(
     #"--color=spinner:#RRGGBB",     # Streaming input indicator
 )
 
-if( $fzfVersion -ge ([version] "0.42.0") )
+if( $fzfVersion -ge ([version] "0.42") )
 {
     $fzfOptions += "--info=right"   # Show found element count on the right
 }
 
-if( $fzfVersion -ge ([version] "0.56.0") )
+if( $fzfVersion -ge ([version] "0.56") )
 {
     $fzfOptions += "--wrap"                         # Wrap multiline entries
     $fzfOptions += "--bind", "alt-w:toggle-wrap"    # Alt+t toggles wrap
