@@ -1,3 +1,81 @@
+function SCRIPT:Use-Fzf
+{
+    [cmdletbinding()]
+    param
+    (
+        [string[]] $Args,
+
+        [Parameter(ValueFromPipeline = $true)]
+        [object] $Item
+    )
+
+    begin
+    {
+        $pipeline = @()
+        $startReloadCommandFallback = ""
+
+        # All not supported arguments are removed or mitigated
+        $args = @(for( $i = 0; $i -lt $args.Count; $i++ )
+        {
+            if( ($args[$i] -eq "--bind") -and
+                ($args[$i+1] -match "^start:reload:(.+)$") -and
+                ($SCRIPT:fzfVersion -lt 0.54) )
+            {
+                $startReloadCommandFallback = $matches[1]
+                Write-Verbose "FZF start:reload mitigation for: $startReloadCommandFallback"
+                $i += 1
+                continue
+            }
+
+            if( ($args[$i] -eq "--preview-label") -and
+                ($SCRIPT:fzfVersion -lt 0.35) )
+            {
+                Write-Verbose "FZF --preview-label $($args[$i+1]) skip"
+                $i += 1
+                continue
+            }
+
+            $args[$i]
+        })
+
+        Write-Verbose "FZF args: $args"
+    }
+    process
+    {
+        # Async processing coould be possible only if we do [Process]::Start
+        $pipeline += $item
+    }
+    end
+    {
+        try
+        {
+            if( $startReloadCommandFallback )
+            {
+                $preserved = $env:FZF_DEFAULT_COMMAND
+                $env:FZF_DEFAULT_COMMAND = $startReloadCommandFallback
+            }
+
+            if( $pipeline )
+            {
+                $pipeline | fzf @Args
+            }
+            else
+            {
+                fzf @Args
+            }
+        }
+        finally
+        {
+            if( $startReloadCommandFallback )
+            {
+                $env:FZF_DEFAULT_COMMAND = $preserved
+            }
+
+            Repair-ConsoleMode
+        }
+    }
+}
+
 function Initialize-FzfArgs
 {
     param
