@@ -63,6 +63,7 @@
         "Show-FzfFilePreview",
         "Start-FzfProcess",
         "Stop-FzfProcess",
+        "Use-Fzf",
         "Update-GitLineEndingsMitigation",
         "Repair-ConsoleMode"
     )

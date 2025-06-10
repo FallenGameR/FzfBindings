@@ -58,20 +58,17 @@ function Start-FzfProcess
         [string] $Path
     )
 
-    $destination = Use-Fzf (Initialize-FzfArgs $Path)
-    $destination
+    $result = Use-Fzf (Initialize-FzfArgs $Path)
+    if( -not $result ) { return }
 
-    if( $destination )
+    # Shell start is different on Unix and Windows
+    if( $PSVersionTable.Platform -eq "Unix" )
     {
-        # Shell start is different on Unix and Windows
-        if( $PSVersionTable.Platform -eq "Unix" )
-        {
-            & $destination
-        }
-        else
-        {
-            start $destination
-        }
+        & $result
+    }
+    else
+    {
+        start $result
     }
 }
 
@@ -119,13 +116,12 @@ function Set-FzfLocation
         "--preview-label", "Folder"
     }
 
-    # Call FZF
-    $destinations = @(Use-Fzf (Get-FzfArgs))
-    $destinations
+    $result = @(Use-Fzf (Get-FzfArgs))
+    if( -not $result ) { return }
 
-    if( $destinations.Length -eq 1 )
+    if( $result.Length -eq 1 )
     {
-        Set-Location $destinations[0]
+        Push-Location $result[0]
     }
 }
 
@@ -201,12 +197,10 @@ function Push-FzfLocation
         }
     }
 
-    $path = Get-DirectoryStack | Sort-Object -desc | Show-FzfFilePreview
+    $result = Get-DirectoryStack | Sort-Object -desc | Show-FzfFilePreview
+    if( -not $result ) { return }
 
-    if( $path )
-    {
-        Push-Location $path
-    }
+    Push-Location $result
 }
 
 function Invoke-FzfHistory
@@ -222,28 +216,18 @@ function Invoke-FzfHistory
         - Alt+a argument highlight (Unix only)
     #>
 
-    trap { Repair-ConsoleMode }
-
-    # Get history reversed
     $commands = @(Get-History)
     [array]::Reverse($commands)
+    $result = ($commands | Out-String) -split [Environment]::NewLine | select -Skip 3 | Use-Fzf (Initialize-FzfArgs)
+    if( -not $result ) { return }
 
-    # Select commands to execute with fzf
-    $text = ($commands | Out-String) -split [Environment]::NewLine | select -Skip 3
-    $result = try{ $text | fzf } finally { Repair-ConsoleMode }
+    $ids = $result | where{ $psitem -match "^\s*(\d+)" } | foreach{ [int] $matches[1] }
+    $toExecute = $commands | where Id -in $ids
+    $command = $toExecute.CommandLine -join "; "
 
-    if( $result )
-    {
-        $ids = $result | where{ $psitem -match "^\s*(\d+)" } | foreach{ [int] $matches[1] }
-        $toExecute = $commands | where Id -in $ids
-        $command = $toExecute.CommandLine -join "; "
-
-        Clear-Host
-        $command
-        Invoke-Expression $command
-    }
-
-    Repair-ConsoleMode
+    Clear-Host
+    $command
+    Invoke-Expression $command
 }
 
 function Invoke-FzfCode

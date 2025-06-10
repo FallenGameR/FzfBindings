@@ -1,4 +1,4 @@
-function SCRIPT:Use-Fzf
+function Use-Fzf
 {
     [cmdletbinding()]
     param
