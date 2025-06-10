@@ -55,7 +55,11 @@ function Initialize-FzfArgs
     "--color=preview-bg:#222222"
     "--padding=1%"
     "--border=rounded"
-    "--bind=alt-w:toggle-wrap"
+
+    if( $SCRIPT:fzfVersion -ge ([version] "0.56.0") )
+    {
+        "--bind=alt-w:toggle-wrap"
+    }
 
     # Preview size changes need to be compatible with different terminals:
     # - VS code does not work with Alt+arrow

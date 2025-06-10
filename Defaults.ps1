@@ -1,10 +1,12 @@
+# Some of the settings are version specific
+$SCRIPT:fzfVersion = [version]((fzf --version) -split " " | select -f 1)
+
 # Default FZF options
 $fzfOptions = @(
     "--layout=reverse",             # Grow list down, not upwards
     "--tabstop=4",                  # Standard tab size
     "--multi",                      # Multi select possible
     "--bind", "alt-t:toggle-all",   # Alt+t toggles selection
-    "--bind", "alt-w:toggle-wrap",  # Alt+t toggles wrap
     "--bind", "alt-q:backward-kill-word",  # Alt+q kills word
                                     # Can't bind ctrl+arrows, but shift-left is backward-word
     "--cycle",                      # Cycle the list
@@ -27,19 +29,19 @@ $fzfOptions = @(
     #"--color=spinner:#RRGGBB",     # Streaming input indicator
 )
 
-$fzfVersion = [version]((fzf --version) -split " " | select -f 1)
-
 if( $fzfVersion -ge ([version] "0.42.0") )
 {
-    $fzfOptions += "--info=right"   # Show found element count on the right(0.42)
+    $fzfOptions += "--info=right"   # Show found element count on the right
 }
 
 if( $fzfVersion -ge ([version] "0.56.0") )
 {
-    $fzfOptions += "--wrap"         # Wrap multiline entries
+    $fzfOptions += "--wrap"                         # Wrap multiline entries
+    $fzfOptions += "--bind", "alt-w:toggle-wrap"    # Alt+t toggles wrap
 }
 
 $env:FZF_DEFAULT_OPTS = $fzfOptions -join " "
+
 if( Get-Command fd -ea Ignore )
 {
     # -I needed to show up sln files on Alt+o
