@@ -11,7 +11,7 @@ function SCRIPT:Use-Fzf
 
     begin
     {
-        $input = @()
+        $pipeline = @()
         $startReloadCommandFallback = ""
 
         # All not supported arguments are removed or mitigated
@@ -43,7 +43,7 @@ function SCRIPT:Use-Fzf
     process
     {
         # Async processing coould be possible only if we do [Process]::Start
-        $input += $item
+        $pipeline += $item
     }
     end
     {
@@ -55,9 +55,9 @@ function SCRIPT:Use-Fzf
                 $env:FZF_DEFAULT_COMMAND = $startReloadCommandFallback
             }
 
-            if( $input )
+            if( $pipeline )
             {
-                $input | fzf @Args
+                $pipeline | fzf @Args
             }
             else
             {
@@ -112,6 +112,7 @@ function Start-FzfProcess
         startf sln
     #>
 
+    [cmdletbinding()]
     param
     (
         [string] $Path
@@ -202,15 +203,19 @@ function Stop-FzfProcess
         killf nuget
     #>
 
+    [cmdletbinding()]
     param
     (
         [string] $Name
     )
 
-    $fzfArgs = Initialize-FzfArgs $Name -ProcessPreview
-    $fzfArgs += "--height=90%" # See a few lines of PS console in case we just dumped $pid to kill it
+    function Get-FzfArgs
+    {
+        Initialize-FzfArgs $Name -ProcessPreview
+        "--height=90%" # See a few lines of PS console in case we just dumped $pid to kill it
+    }
 
-    $lines = try{ gps | Out-Table | fzf @fzfArgs } finally { Repair-ConsoleMode }
+    $lines = Get-Process | Format-Table -Auto | Out-String | foreach Trim | Use-Fzf (Get-FzfArgs)
     $lines | foreach{ Stop-Process -Id (-split $psitem)[4] -Verbose -ea Ignore }
 }
 

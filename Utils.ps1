@@ -1,8 +1,3 @@
-function SCRIPT:Out-Table
-{
-    @($input) | Format-Table -Auto | Out-String | foreach Trim
-}
-
 function Initialize-FzfArgs
 {
     param
