@@ -127,8 +127,6 @@ function Set-FzfLocation
     {
         Set-Location $destinations[0]
     }
-
-    Repair-ConsoleMode
 }
 
 function Stop-FzfProcess
@@ -209,8 +207,6 @@ function Push-FzfLocation
     {
         Push-Location $path
     }
-
-    Repair-ConsoleMode
 }
 
 function Invoke-FzfHistory
@@ -435,6 +431,11 @@ function Repair-ConsoleMode
 
     .NOTES
         https://github.com/junegunn/fzf/issues/3334
+
+        fzf seems to have a background thread that can mess up the console mode even after
+        the main thread is killed and the console get control from the fzf back
+
+        so far the only robust way to fix it is to call this from the prompt function
     #>
 
     $GetStdHandle = '[DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr GetStdHandle(int nStdHandle);'
@@ -446,15 +447,11 @@ function Repair-ConsoleMode
         -PassThru `
         -MemberDefinition "$GetStdHandle $GetConsoleMode $SetConsoleMode"
 
+    # Sometimes there are races with fzf that seems to set the console mode in an async way after set
     [UInt32] $mode = 0
-    $get = $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode)
-    Write-Host "Console mode: $mode, GetStdHandle: $get" -ForegroundColor Cyan
+    $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode) | Out-Null
 
     $DISABLE_NEWLINE_AUTO_RETURN = 0x8
     $mode = $mode -band (-bnot $DISABLE_NEWLINE_AUTO_RETURN)
-    $set = $Kernel32::SetConsoleMode($Kernel32::GetStdHandle(-11), $mode)
-    Write-Host "Console mode: $mode, SetStdHandle: $get" -ForegroundColor Cyan
-
-    $get = $Kernel32::GetConsoleMode($Kernel32::GetStdHandle(-11), [ref]$mode)
-    Write-Host "Console mode: $mode, GetStdHandle: $get" -ForegroundColor Cyan
+    $Kernel32::SetConsoleMode($Kernel32::GetStdHandle(-11), $mode) | Out-Null
 }
