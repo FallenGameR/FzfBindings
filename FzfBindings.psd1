@@ -6,7 +6,7 @@
     RootModule = 'FzfBindings.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.14.20250610'
+    ModuleVersion = '1.15.20250612'
 
     # ID used to uniquely identify this module
     GUID = 'fb98390c-1080-4d3a-ab8a-439d02e995f6'
@@ -28,6 +28,17 @@
 
     # Variables to export from this module
     VariablesToExport = '*'
+
+    # Script files (.ps1) that are run in the caller's environment prior to importing this module.
+    ScriptsToProcess = @("Requirements.ps1")
+
+    # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
+    NestedModules = @(
+        "Defaults.ps1",
+        "Utils.ps1",
+        "Initialize-ShellFzf.ps1",
+        "Initialize-GitFzf.ps1"
+    )
 
     # Aliases to export from this module
     AliasesToExport = @(
@@ -70,24 +81,4 @@
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules = @()
-
-    # List of all files packaged with this module
-    FileList = @(
-        ".\FzfBindings.psd1",
-        ".\FzfBindings.psm1",
-        ".\Defaults.ps1.ps1",
-        ".\Initialize-GitFzf.ps1",
-        ".\Initialize-ShellFzf.ps1",
-        ".\Utils.ps1",
-        ".\notes.md",
-        ".\readme.md",
-        ".\Bin\.gitignore",
-        #".\Bin\Walker\walker.exe",
-        ".\Data\excluded_folders",
-        ".\Data\picture_extensions",
-        ".\Preview\Show-FileEntry.ps1",
-        ".\Preview\Show-GitBranch.ps1",
-        ".\Walk\Get-FileEntry.ps1",
-        ".\Walk\Get-Folder.ps1"
-    )
 }

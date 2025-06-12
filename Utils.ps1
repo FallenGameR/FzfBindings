@@ -238,7 +238,15 @@ function Show-BatHelp
     }
     process
     {
-        $accumulator += $psitem
+        $isPowershellHelpExample = $psitem -match "\s*-+ Example (\d+: .+) --+"
+        $accumulator += if( $isPowershellHelpExample )
+        {
+            "`r`n" * 2 + "-- EXAMPLE " + $matches[1] + "`r`n"
+        }
+        else
+        {
+            $psitem
+        }
     }
     end
     {

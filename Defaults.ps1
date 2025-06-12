@@ -1,6 +1,12 @@
 # Detected fzf version
 $SCRIPT:fzfVersion = [version]((fzf --version) -split " " | select -f 1)
 
+$fzfMinVersion = "0.31"
+if( $SCRIPT:fzfVersion -lt $fzfMinVersion )
+{
+    throw "fzf version $fzfVersion installed, but at least $fzfMinVersion is needed, please update it first"
+}
+
 # If fzf is of a specific version, use the following options
 function SCRIPT:Use-Version( [version] $minVersion, [string[]] $fzfOptions )
 {

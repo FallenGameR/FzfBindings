@@ -1,28 +1,3 @@
-# Test that all dependencies are satisfied
-function SCRIPT:Assert-ToolInstalled( $name, [switch] $IsWarning )
-{
-    if( -not (Get-Command $name -ea Ignore) )
-    {
-        $info = "$name is needed, please install it first"
-
-        if( $IsWarning )
-        {
-            Write-Warning "$info, some functionality would not work for now"
-        }
-        else
-        {
-            throw $info
-        }
-    }
-}
-
-Assert-ToolInstalled fzf
-Assert-ToolInstalled pwsh
-Assert-ToolInstalled bat -IsWarning
-Assert-ToolInstalled rg -IsWarning
-#Assert-ToolInstalled chafa -IsWarning
-#Assert-ToolInstalled glow -IsWarning
-
 # This variable would be used to call preview scripts
 # Theoretically previews in classic Powershell could be faster if we don't call modern powershell
 # from classic powershell. But then the preview scripts would need to be reworked as well
@@ -32,18 +7,6 @@ if( $PSVersionTable.Platform -ne "Unix" )
 {
     # Cross platform way to call pwsh
     $SCRIPT:pwsh += ".exe"
-}
-
-# Include all used files
-. "$PSScriptRoot\Defaults.ps1"
-. "$PSScriptRoot\Utils.ps1"
-. "$PSScriptRoot\Initialize-ShellFzf.ps1"
-. "$PSScriptRoot\Initialize-GitFzf.ps1"
-
-$fzfMinVersion = "0.31"
-if( $SCRIPT:fzfVersion -lt $fzfMinVersion )
-{
-    throw "fzf version $fzfVersion installed, but at least $fzfMinVersion is needed, please update it first"
 }
 
 # Set up aliases
