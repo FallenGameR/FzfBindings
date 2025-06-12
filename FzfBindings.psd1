@@ -24,13 +24,15 @@
     PowerShellVersion = '5.0'
 
     # Cmdlets to export from this module
-    CmdletsToExport = '*'
+    CmdletsToExport = @()
 
     # Variables to export from this module
-    VariablesToExport = '*'
+    VariablesToExport = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess = @("Requirements.ps1")
+    ScriptsToProcess = @(
+        "Requirements.ps1"
+    )
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     NestedModules = @(
