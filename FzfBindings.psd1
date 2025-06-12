@@ -36,8 +36,8 @@
     NestedModules = @(
         "Defaults.ps1",
         "Utils.ps1",
-        "Initialize-ShellFzf.ps1",
-        "Initialize-GitFzf.ps1"
+        "Git.ps1",
+        "Shell.ps1"
     )
 
     # Aliases to export from this module
