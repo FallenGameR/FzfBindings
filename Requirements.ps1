@@ -11,7 +11,12 @@ if( -not (Get-Command 'pwsh' -ErrorAction Ignore) )
 
 if( -not (Get-Command 'bat' -ErrorAction Ignore) )
 {
-    Write-Warning "bat is needed for colorful previews, please install it first, preview functionality is would be limited"
+    Write-Warning "bat is needed for colorful previews, please install it first, file preview functionality is would be limited"
+}
+
+if( -not (Get-Command 'delta' -ErrorAction Ignore) )
+{
+    Write-Warning "delta is needed, please install it first, git diff preview functionality is would be limited"
 }
 
 if( -not (Get-Command 'rg' -ErrorAction Ignore) )
