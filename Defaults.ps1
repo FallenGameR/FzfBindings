@@ -77,6 +77,5 @@ if( Get-Command Register-Shortcut -ea Ignore )
     Register-Shortcut "Alt+d" "cdf" "Change directory"
     Register-Shortcut "Alt+u" "pushf" "Go up fuzzy"
     Register-Shortcut "Alt+s" "Select-GitBranch" "Switch to a git branch"
-    Register-Shortcut "Alt+p" "Send-GitBranch" "Pull request for a git branch"
     Register-Shortcut "Alt+l" "Clear-GitBranch" "Clear a completed pull request for a git branch"
 }

@@ -52,7 +52,6 @@
         "hlp",
         "killf",
         "pf",
-        "prf",
         "pushf",
         "rgf",
         "startf"
@@ -69,7 +68,6 @@
         "Push-FzfLocation",
         "Search-FzfRipgrep",
         "Select-GitBranch",
-        "Send-GitBranch",
         "Set-FzfLocation",
         "Show-BatHelp",
         "Show-FzfFilePreview",

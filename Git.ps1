@@ -83,49 +83,6 @@ function Select-GitBranch( $name )
     }
 }
 
-function Send-GitBranch( $name, [switch] $Force )
-{
-    trap
-    {
-        Write-Progress "PR creation" -Completed
-    }
-
-    Write-Progress "PR creation" "Check git status"
-    Assert-GitEmptyStatus
-
-    Write-Progress "PR creation" "Getting branches"
-    $status = "Create|Update"
-    if( $forced ) { $status = "$status|Blocked" }
-    $branches = Get-GitBranch | where Status -Match $status
-
-    Write-Progress "PR creation" "Branch selection"
-    if( -not $branches ) { return }
-    $selected = $branches | Select-FzfGitBranch Branch $name
-    if( -not $selected ) { return }
-
-    Write-Progress "PR creation" "Branch verification"
-    $created = @($selected | where Status -Match "Create")
-    if( $created.Length -gt 1 ) { throw "It is possible to create only one PR at a time. Please send PRs for $(($created | % Branch) -join ',') separatelly"}
-
-    Write-Progress "PR creation" "Branch send to origin"
-    foreach( $item in $selected )
-    {
-        Write-Progress "PR creation" "$($item.Branch) branch, pushing branch to origin"
-        Update-GitPush "$($item.Branch):dev/$env:username/$($item.Branch)"
-    }
-
-    if( $created )
-    {
-        Write-Progress "PR creation" "$($created.Branch) branch, opening browser to annotate PR"
-        $url = $env:FZF_BINDINGS_PR_URL
-        if( -not $url )
-        {
-            $url = git config --get remote.origin.url
-        }
-        start $url
-    }
-}
-
 function Resolve-GitMasterBranch
 {
     if( git rev-parse --verify "master" 2>$null )

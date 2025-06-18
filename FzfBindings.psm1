@@ -18,7 +18,6 @@ Set-Alias hf Invoke-FzfHistory
 Set-Alias hlp Show-BatHelp
 Set-Alias killf Stop-FzfProcess
 Set-Alias pf Show-FzfFilePreview
-Set-Alias prf Send-GitBranch
 Set-Alias pushf Push-FzfLocation
 Set-Alias rgf Search-FzfRipgrep
 Set-Alias startf Start-FzfProcess
