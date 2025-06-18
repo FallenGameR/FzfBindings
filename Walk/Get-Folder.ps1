@@ -17,8 +17,8 @@ function excluded_folders
 
 function included_folders
 {
-    Join-Path $env:HOME Downloads
-    Join-Path $env:HOME Documents
+    Join-Path $home Downloads
+    Join-Path $home Documents
     $env:FZF_QUICK_PATHS -split [io.path]::PathSeparator
 }
 
