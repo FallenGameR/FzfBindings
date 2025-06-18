@@ -111,24 +111,14 @@ function Clear-GitBranch( $name, [switch] $Force )
     $master = Resolve-GitMasterBranch
 
     Write-Progress "PR cleanup" "Getting branches"
-    # Create is needed since in some cases we compelted PR and there is is no local mention of the remove branch
-    $status = "Create|Exists"
-    if( $force ) { $status = "$status|Blocked" }
-    $branches = Get-GitBranch | where Status -Match $status
-    # Current branch can be null if we didn't select it
-    $current = $branches | where IsCurrent
+    $branches = Get-GitBranch
+    $current = $branches | where Current
 
     Write-Progress "PR cleanup" "Branch selection"
     if( -not $branches ) { return }
-    $selected = $branches | select Branch, Freshness, Status | Select-FzfGitBranch Branch $name | foreach Branch
+    $selected = $branches | Select-FzfGitBranch Branch $name | foreach Branch
     $selected = @($branches | where{ $psitem.Branch -in $selected })
     if( -not $selected ) { return }
-
-    Write-Progress "PR cleanup" "Branch verification"
-    $sent = @($selected | foreach Branch)
-    $affected = @($selected | foreach{ $psitem.Affects })
-    $conflicts = Compare-Object $sent $affected -PassThru -IncludeEqual -ExcludeDifferent
-    if( $conflicts ) { throw "Selected combination of branches conflicts in shared changes: $($conflicts -join ','). Please clear branches separetelly." }
 
     # Work from the latest master
     Write-Progress "PR cleanup" "Updating master"
@@ -155,14 +145,6 @@ function Clear-GitBranch( $name, [switch] $Force )
             Update-GitReset "head~1"
             Write-Progress "PR cleanup" "'$($item.Branch)' branch reverted, there are extra changes in it that were not present in master. PR was not completed."
             continue
-        }
-
-        foreach( $affected in $item.Affects )
-        {
-            Write-Progress "PR cleanup" "'$($item.Branch)' branch, updating affected branch $affected"
-            Update-GitCheckoutBranch $affected
-            Update-GitMerge $item.Branch
-            Write-Progress "PR cleanup" "'$($item.Branch)' branch, update of affected branch $affected done"
         }
 
         $toDelete += $item.Branch
