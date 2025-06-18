@@ -35,12 +35,8 @@
     )
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules = @(
-        "Defaults.ps1",
-        "Utils.ps1",
-        "Git.ps1",
-        "Shell.ps1"
-    )
+    # Referencing .ps1 here does not work in the Constrained Language Mode even when all is signed
+    NestedModules = @()
 
     # Aliases to export from this module
     AliasesToExport = @(

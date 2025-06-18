@@ -21,3 +21,9 @@ Set-Alias pf Show-FzfFilePreview
 Set-Alias pushf Push-FzfLocation
 Set-Alias rgf Search-FzfRipgrep
 Set-Alias startf Start-FzfProcess
+
+# Nested modules
+. $PSScriptRoot\Defaults.ps1
+. $PSScriptRoot\Utils.ps1
+. $PSScriptRoot\Git.ps1
+. $PSScriptRoot\Shell.ps1
