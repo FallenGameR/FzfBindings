@@ -12,7 +12,7 @@ function SCRIPT:e { "`e[" + ($args -join ";") + "m" }
 #return
 
 # Affects - very slow
-#$affects = Get-GitPrBranch | where Branch -eq $branch | foreach Affects
+#$affects = Get-GitBranch | where Branch -eq $branch | foreach Affects
 #if( $affects )
 #{
 #    "Affects: $(e 36)$affects$(e 0)"

@@ -63,7 +63,6 @@
         "Initialize-FzfArgs",
         "Clear-GitBranch",
         "Get-GitBranch",
-        "Get-GitPrBranch",
         "Resolve-GitMasterBranch",
         "Invoke-FzfCode",
         "Invoke-FzfHistory",

@@ -1,6 +1,6 @@
 # Clear-GitBranch or Select-GitBranch messes up with the prompt
 
-function Get-GitBranch
+function Get-GitBranch( [switch] $Raw )
 {
     $names = git for-each-ref --format "%(refname:short)" refs/heads/
     $master = Resolve-GitMasterBranch
@@ -23,33 +23,37 @@ function Get-GitBranch
             AbsoluteDate = [datetimeoffset]::Parse($absolute)
         }
 
-        # Deprecated: ContainsBranches, AffectsBranches, PullRequestStatus
-        # Wrong results: HasUnreviewedChanges (hotfix markers)
-        # Rename: WasPullRequestSent -> PR (exclude master/main), IsCurrent -> Current, UpstreamBranch -> Upstream
-        # Add: HF
-
         New-Object -TypeName PSObject -Property $properties
     }
 
-    $itemes
-}
-function Get-GitPrBranch
-{
-    $itemes = Get-GitBranch
+    # No refining for the raw output
+    if( $Raw )
+    {
+        return $itemes
+    }
+
+    # Refine the branches
+    $master = Resolve-GitBranch "$master@{upstream}"
+
+    function Get-Status( $branch )
+    {
+        $elements = @()
+        if( $branch.Remote ) { $elements += "ADO" }
+        if( $branch.Upstream -and ($branch.Upstream -ne $master) ) { $elements += "-> $($branch.Upstream)" }
+        return $elements -join " "
+    }
 
     $itemesReadable = $itemes | select `
-        @{ Label = "Branch"; Expression = { $psitem.Name } },
-        @{ Label = "Status"; Expression = { $psitem.PullRequestStatus } },
+        @{ Label = "Branch"; Expression = { if( $_.Current ) { "$($psitem.Name) *" } else { $psitem.Name } } },
+        @{ Label = "Status"; Expression = { Get-Status $psitem } },
         @{ Label = "Freshness"; Expression = { $psitem.RelativeDate } },
-        @{ Label = "Affects"; Expression = { $psitem.AffectsBranches } },
         @{ Label = "AbsoluteDate"; Expression = { $psitem.AbsoluteDate } }
 
     $sort =
         @{ Expression = "AbsoluteDate"; Descending = $true },
-        @{ Expression = "Status"; Descending = $true },
         @{ Expression = "Name"; Descending = $false }
 
-    $itemesReadable | sort $sort | select Branch, Status, Freshness, Affects
+    $itemesReadable | sort $sort | select Branch, Status, Freshness
 }
 
 function Select-GitBranch( $name )
@@ -60,7 +64,7 @@ function Select-GitBranch( $name )
     Assert-GitEmptyStatus
 
     Write-Progress "Branch selection" "Getting branches"
-    $branches = Get-GitPrBranch | select Branch, Freshness, Status
+    $branches = Get-GitBranch
     if( -not $branches ) { return }
 
     $selected = $branches | Select-FzfGitBranch Branch $name | select -f 1
@@ -92,7 +96,7 @@ function Send-GitBranch( $name, [switch] $Force )
     Write-Progress "PR creation" "Getting branches"
     $status = "Create|Update"
     if( $forced ) { $status = "$status|Blocked" }
-    $branches = Get-GitPrBranch | where Status -Match $status
+    $branches = Get-GitBranch | where Status -Match $status
 
     Write-Progress "PR creation" "Branch selection"
     if( -not $branches ) { return }
@@ -153,7 +157,7 @@ function Clear-GitBranch( $name, [switch] $Force )
     # Create is needed since in some cases we compelted PR and there is is no local mention of the remove branch
     $status = "Create|Exists"
     if( $force ) { $status = "$status|Blocked" }
-    $branches = Get-GitPrBranch | where Status -Match $status
+    $branches = Get-GitBranch | where Status -Match $status
     # Current branch can be null if we didn't select it
     $current = $branches | where IsCurrent
 
