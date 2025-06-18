@@ -80,7 +80,4 @@
         "Update-GitLineEndingsMitigation",
         "Repair-ConsoleMode"
     )
-
-    # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules = @()
 }

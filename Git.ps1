@@ -10,45 +10,23 @@ function Get-GitBranch
     {
         $prBranch = git branch --remotes --list branch "origin/dev/$env:USERNAME/$name" | % trim
 
-        # Not sure if it is needed anymore
-        $contains = @($names |
-            where{ $psitem -notmatch "(^$name|$master)$" } |
-            where{ git merge-base $psitem --is-ancestor $name; $LASTEXITCODE -eq 0 } )
-
-        $affects = @($names |
-        where{ $psitem -notmatch "(^$name|$master)$" } |
-        where{
-            $base = git merge-base $psitem $name
-            git merge-base $base --is-ancestor $master
-            $LASTEXITCODE -eq 1
-        })
-
         # %cr is committer date, relative, e.g. "2 weeks ago"
         # %ci is committer date, ISO 8601-like format, e.g. "2020-04-20 14:00:00 +0200"
         $relative, $absolute = (git log $name -1 --pretty=format:'%cr#%ci') -split "#"
 
         $properties = [ordered] @{
             Name = $name
-            IsCurrent = $name -eq $current
-            WasPullRequestSent = [bool] $prBranch
-            HasUnreviewedChanges = $prBranch -and (-not (Test-GitPointAtSameCommit $name $prBranch))
-            ContainsBranches = $contains
-            AffectsBranches = $affects
-            UpstreamBranch = Resolve-GitBranch "$name@{upstream}"
-            PullRequestStatus = "Unknown"
+            Current = $name -eq $current
+            Remote = ([bool] $prBranch) -and ($name -ne $master)
+            Upstream = Resolve-GitBranch "$name@{upstream}"
             RelativeDate = $relative -replace " ago", ""
             AbsoluteDate = [datetimeoffset]::Parse($absolute)
         }
 
-        $properties.PullRequestStatus =
-            if( $name -match "^(master|main)$" ) { "PR None" }
-            elseif( $properties.AffectsBranches ) { "PR Blocked" }
-            elseif( $properties.WasPullRequestSent )
-            {
-                if( $properties.HasUnreviewedChanges ) { "PR Update" }
-                else { "PR Exists" }
-            }
-            else { "PR Create" }
+        # Deprecated: ContainsBranches, AffectsBranches, PullRequestStatus
+        # Wrong results: HasUnreviewedChanges (hotfix markers)
+        # Rename: WasPullRequestSent -> PR (exclude master/main), IsCurrent -> Current, UpstreamBranch -> Upstream
+        # Add: HF
 
         New-Object -TypeName PSObject -Property $properties
     }
