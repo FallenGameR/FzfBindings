@@ -25,7 +25,6 @@ if( $prBranch )
     $isSameCommit = (git rev-parse --verify $branch) -eq (git rev-parse --verify $prBranch)
     if( $isSameCommit ) { $prBranch = $null }
 }
-$diffStart = if( $prBranch ) { $prBranch } else { git merge-base $branch "origin/$master" }
 $logParams = @(
     "--color=always",
     "--graph",
@@ -39,20 +38,42 @@ $logParams = @(
 if( $branch -eq $master )
 {
     "`n$(e 36)# Log$(e 0)`n"
-    $param = @("log", $branch, "-20", $logParams)
+    $param = @("log", $branch, "-40", $logParams)
     git @param
     return
 }
 
-# Log output
-"`n$(e 36)# Iteration log$(e 0)`n"
+# Output latest unpublished PR iteration
+if( $prBranch )
+{
+    $diffStart = $prBranch
+
+    "`n$(e 36)# Commits since last PR in $prBranch$(e 0)`n"
+    $param = @("log", "$diffStart..$branch", "-10", $logParams)
+    git @param
+
+    "`n`n$(e 36)# Diff since last PR in $prBranch$(e 0)"
+    if( gcm delta )
+    {
+        # for some reason delta is not picked up by default
+        git --no-pager diff $diffStart $branch "--color=always" | delta
+    }
+    else
+    {
+        git diff $diffStart $branch "--color=always"
+    }
+}
+
+# Output completelly unpublished PR
+"`n$(e 36)# Commits since origin/master$(e 0)`n"
+$diffStart = git merge-base $branch "origin/$master"
 $param = @("log", "$diffStart..$branch", "-10", $logParams)
 git @param
 
-# Diff, for some reason delta is not picked up by default
-"`n`n$(e 36)# Interation diff$(e 0)"
+"`n`n$(e 36)# Diff since origin/master$(e 0)"
 if( gcm delta )
 {
+    # for some reason delta is not picked up by default
     git --no-pager diff $diffStart $branch "--color=always" | delta
 }
 else
