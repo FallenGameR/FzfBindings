@@ -5,18 +5,13 @@ function SCRIPT:e { "`e[" + ($args -join ";") + "m" }
 
 # Init
 "Branch $(e 36)$branch$(e 0)"
+""
+git config branch.$branch.description | where{ $_ } | % { "$(e 38 5 120)$_$(e 0)" }
 
 # Fast preview - leave only this if calling anything else additionally is slow
 #""
 #git show --color=always $branch
 #return
-
-# Affects - very slow
-#$affects = Get-GitBranch | where Branch -eq $branch | foreach Affects
-#if( $affects )
-#{
-#    "Affects: $(e 36)$affects$(e 0)"
-#}
 
 $master = Resolve-GitMasterBranch
 $prBranch = git branch --remotes --list branch "origin/dev/$env:USERNAME/$branch" | % trim
