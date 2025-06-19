@@ -78,6 +78,7 @@ function Select-GitBranch( $name )
     {
         Update-GitCheckoutBranch $selected.Branch
         Assert-GitEmptyStatus
+        git config "branch.$($selected.Branch).description"
     }
     else
     {
