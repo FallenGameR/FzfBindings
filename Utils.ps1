@@ -35,7 +35,7 @@ function Use-Fzf
                 continue
             }
 
-            if( ($args[$i] -match ":toggle-wrap$") -and
+            if( ($args[$i] -match "-wrap$") -and
                 ($SCRIPT:fzfVersion -lt 0.54) )
             {
                 Write-Verbose "FZF $($args[$i]) skip"
@@ -151,6 +151,7 @@ function Initialize-FzfArgs
     "--color=preview-bg:#222222"
     "--padding=1%"
     "--border=rounded"
+    "--no-wrap"
     "--bind=alt-w:toggle-wrap"
 
     # Preview size changes need to be compatible with different terminals:

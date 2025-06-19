@@ -16,6 +16,7 @@ function Get-GitBranch( [switch] $Raw )
 
         $properties = [ordered] @{
             Name = $name
+            Description = git config branch.$name.description
             Current = $name -eq $current
             Remote = ([bool] $prBranch) -and ($name -ne $master)
             Upstream = Resolve-GitBranch "$name@{upstream}"
@@ -47,13 +48,14 @@ function Get-GitBranch( [switch] $Raw )
         @{ Label = "Branch"; Expression = { if( $_.Current ) { "$($psitem.Name) *" } else { $psitem.Name } } },
         @{ Label = "Status"; Expression = { Get-Status $psitem } },
         @{ Label = "Freshness"; Expression = { $psitem.RelativeDate } },
-        @{ Label = "AbsoluteDate"; Expression = { $psitem.AbsoluteDate } }
+        @{ Label = "AbsoluteDate"; Expression = { $psitem.AbsoluteDate } },
+        @{ Label = "Description"; Expression = { $psitem.Description -join "`r`n" } }
 
     $sort =
         @{ Expression = "AbsoluteDate"; Descending = $true },
         @{ Expression = "Name"; Descending = $false }
 
-    $itemesReadable | sort $sort | select Branch, Status, Freshness
+    $itemesReadable | sort $sort | select Branch, Status, Freshness, Description
 }
 
 function Select-GitBranch( $name )
