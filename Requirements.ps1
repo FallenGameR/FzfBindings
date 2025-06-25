@@ -11,12 +11,12 @@ if( -not (Get-Command 'pwsh' -ErrorAction Ignore) )
 
 if( -not (Get-Command 'bat' -ErrorAction Ignore) )
 {
-    Write-Warning "bat is needed for colorful previews, please install it first, file preview functionality is would be limited"
+    Write-Warning "bat is needed for colorful previews, file previews would be limited"
 }
 
 if( -not (Get-Command 'delta' -ErrorAction Ignore) )
 {
-    Write-Warning "delta is needed, please install it first, git diff preview functionality is would be limited"
+    Write-Warning "delta is needed, please install it first, git diff preview would be limited"
 }
 
 if( -not (Get-Command 'rg' -ErrorAction Ignore) )
@@ -24,6 +24,12 @@ if( -not (Get-Command 'rg' -ErrorAction Ignore) )
     Write-Warning "rg is needed, please install it first, text search would not work"
 }
 
-#Assert-ToolInstalled chafa -IsWarning
-#Assert-ToolInstalled glow -IsWarning
+if( -not (Get-Command 'chafa' -ErrorAction Ignore) )
+{
+    Write-Warning "chafa is needed, please install it first, image previews would not work"
+}
 
+if( -not (Get-Command 'glow' -ErrorAction Ignore) )
+{
+    Write-Warning "glow is needed, please install it first, markdown previews would be limited"
+}
