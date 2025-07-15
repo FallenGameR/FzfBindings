@@ -6,7 +6,7 @@
     RootModule = 'FzfBindings.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.18.20250625'
+    ModuleVersion = '1.19.20250715'
 
     # ID used to uniquely identify this module
     GUID = 'fb98390c-1080-4d3a-ab8a-439d02e995f6'
@@ -30,9 +30,7 @@
     VariablesToExport = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess = @(
-        "Requirements.ps1"
-    )
+    ScriptsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     # Referencing .ps1 here does not work in the Constrained Language Mode even when all is signed

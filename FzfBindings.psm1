@@ -1,3 +1,6 @@
+# Requirements, can't move them to ScriptsToProcess since it is broken in the Constrained Language Mode
+. $PSScriptRoot\Requirements.ps1
+
 # This variable would be used to call preview scripts
 # Theoretically previews in classic Powershell could be faster if we don't call modern powershell
 # from classic powershell. But then the preview scripts would need to be reworked as well
