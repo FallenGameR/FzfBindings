@@ -60,6 +60,7 @@ function Start-FzfProcess
 
     $result = Use-Fzf (Initialize-FzfArgs $Path)
     if( -not $result ) { return }
+    $result
 
     # Shell start is different on Unix and Windows
     if( $PSVersionTable.Platform -eq "Unix" )
@@ -118,6 +119,7 @@ function Set-FzfLocation
 
     $result = @(Use-Fzf (Get-FzfArgs))
     if( -not $result ) { return }
+    $result
 
     if( $result.Length -eq 1 )
     {
